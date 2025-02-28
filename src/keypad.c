@@ -34,7 +34,16 @@ bool irq_update_keypad(repeating_timer_t *_) {
 
 void keypad_next_frame() {
     memcpy(keypad_last_frame, keypad, sizeof(keypad));
-    memset(keypad, 0, sizeof(keypad));
+    // memset(keypad, 0, sizeof(keypad));
+    for (int i = 0; i < 12; i++) {
+        keypad[i].pressed = false;
+        keypad[i].released = false;
+        if (keypad[i].held) {
+            keypad[i].f_pressed += 1;
+        } else {
+            keypad[i].f_pressed = 0;
+        }
+    }
 }
 
 inline void set_key(int half_x, int half_y, int i, uint32_t now, struct Key *pad, struct Key *last_pad) {
@@ -47,6 +56,9 @@ inline void set_key(int half_x, int half_y, int i, uint32_t now, struct Key *pad
         times[idx] = now;
     }
     pad[idx].held = state;
+    if (!state) {
+        pad[idx].f_pressed = 0;
+    }
     if (state && !last_pad[idx].held) {
         pad[idx].pressed = true;
     }

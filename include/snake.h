@@ -2,6 +2,7 @@
 #define _SNAKE_H
 #include <stdbool.h>
 #include <stdint.h>
+#include "../include/drawing.h"
 #include "../include/st7789_pio.h"
 
 #define X_BLOCKS 20
@@ -16,5 +17,5 @@ struct SnakeState {
 };
 
 void Snake_init(struct SnakeState *state);
-void Snake_step(struct SnakeState *state, uint16_t *buffer);
+void Snake_step(struct SnakeState *state, Screen s);
 #endif

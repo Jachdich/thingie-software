@@ -1,20 +1,9 @@
+#include "../include/drawing.h"
 #include "../include/snake.h"
 #include "../include/st7789_pio.h"
 #include "../include/keypad.h"
 #include <stdlib.h>
 #include "pico/time.h"
-
-void draw_rect(int x, int y, int col, uint16_t *buffer) {
-    for (int j = y; j < y + 8; j++) {
-        if (j > 240 || j < 0) continue;
-        for (int i = x; i < x + 8; i++) {
-            if (i > 240 || i < 0) continue;
-            // st7789_set_cursor(i, j);
-            // st7789_put(col);
-            buffer[j * 240 + i] = col;
-        }
-    }
-}
 
 void Snake_new_apple(struct SnakeState *state) {
     // while (true) {
@@ -74,7 +63,7 @@ inline int wrap(int i) {
     return i % (X_BLOCKS * Y_BLOCKS);
 }
 
-void Snake_step(struct SnakeState *state, uint16_t *buffer) {
+void Snake_step(struct SnakeState *state, Screen s) {
     long time = to_ms_since_boot(get_absolute_time());
     Snake_update_velocity(state);
     keypad_next_frame();
@@ -123,17 +112,17 @@ void Snake_step(struct SnakeState *state, uint16_t *buffer) {
         int y = (state->snake[i] >> 8) & 0xFF;
 
         if ((i + 1) % (X_BLOCKS * Y_BLOCKS) != state->snake_head) {
-            draw_rect(x * BLOCK_WIDTH, y * BLOCK_WIDTH, 0b0000011111100000, buffer);
+            draw_rect(s, vec2(x * BLOCK_WIDTH, y * BLOCK_WIDTH), vec2(8, 8), 0b0000011111100000);
         } else {
-            draw_rect(x * BLOCK_WIDTH, y * BLOCK_WIDTH, 0b1100111111100000, buffer);
+            draw_rect(s, vec2(x * BLOCK_WIDTH, y * BLOCK_WIDTH), vec2(8, 8), 0b1100111111100000);
         }
         if ((i + 1) % (X_BLOCKS * Y_BLOCKS) != state->snake_head) {
             int x2 = state->snake[(i + 1) % (X_BLOCKS * Y_BLOCKS)] & 0xFF;
             int y2 = (state->snake[(i + 1) % (X_BLOCKS * Y_BLOCKS)] >> 8) & 0xFF;
-            draw_rect((x+x2) * BLOCK_WIDTH / 2, (y + y2) * BLOCK_WIDTH / 2, 0b0000011000000000, buffer);
+            draw_rect(s, vec2((x+x2) * BLOCK_WIDTH / 2, (y + y2) * BLOCK_WIDTH / 2), vec2(8, 8), 0b0000011000000000);
         }
     }
-    draw_rect(state->apple_x * BLOCK_WIDTH, state->apple_y * BLOCK_WIDTH, 0b1111100000000000, buffer);
+    draw_rect(s, vec2(state->apple_x * BLOCK_WIDTH, state->apple_y * BLOCK_WIDTH), vec2(8, 8), 0b1111100000000000);
 
     long time2;
     while ((time2 = to_ms_since_boot(get_absolute_time())) - time < (1000.0 / 6.0)) {

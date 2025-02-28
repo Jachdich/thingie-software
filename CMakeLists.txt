@@ -8,6 +8,8 @@ project(my_project)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+add_definitions("-pedantic -W -Wall -Wunreachable-code  -Wwrite-strings -Wpointer-arith -Wbad-function-cast -Wcast-align -Wcast-qual")
+
 add_executable(main
     src/main.c
     src/st7789_pio.c
@@ -15,6 +17,16 @@ add_executable(main
     # src/st7789.c
     src/snake.c
     src/minesweeper.c
+    src/drawing.c
+
+    lib/mcufont/mf_bwfont.c
+    lib/mcufont/mf_font.c
+    lib/mcufont/mf_kerning.c
+    lib/mcufont/mf_scaledfont.c
+    lib/mcufont/mf_encoding.c
+    lib/mcufont/mf_justify.c
+    lib/mcufont/mf_rlefont.c
+    lib/mcufont/mf_wordwrap.c
 )
 
 # Add pico_stdlib library which aggregates commonly used features

@@ -1,4 +1,5 @@
 // #include "../include/st7789.h"
+#include "../include/drawing.h"
 #include "../include/st7789_pio.h"
 #include "../include/keypad.h"
 #include "../include/snake.h"
@@ -9,6 +10,8 @@
 #include "pico/multicore.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
 
 // const struct st7789_config lcd_config = {
 //     .spi      = spi0,
@@ -25,6 +28,8 @@ uint16_t framebuffer0[240*240];
 uint16_t framebuffer1[240*240];
 uint16_t *front_buffer;
 uint16_t *back_buffer;
+
+uint8_t *game_arena[10*1024]; // just allocate 10MiB for now...
 
 void core1_entry() {
     alarm_pool_t *pool = alarm_pool_create_with_unused_hardware_alarm(1);
@@ -56,7 +61,6 @@ void st7789_set_brightness(int brightness) {
     pwm_set_chan_level(bl_slice_num, PWM_CHAN_A, brightness);
 }
 
-
 #define PIN_BL 26
 int main() {
     stdio_init_all();
@@ -74,10 +78,7 @@ int main() {
     // struct SnakeState snakestate;
     // Snake_init(&snakestate);
 
-    const int width = 26;
-    const int height = width;
-    uint8_t board[width * height];
-    GameState minestate = minesweeper_init(board, width, height);
+    MineState minestate = minesweeper_init();
 
     multicore_launch_core1(core1_entry);
 
@@ -89,16 +90,24 @@ int main() {
     pwm_set_enabled(bl_slice_num, true);
 
     // set_sys_clock_khz(200 * 1000, true);
+    // const struct mf_font_s *font = mf_find_font("fixed_10x20");
     while (1) {
         long time = to_us_since_boot(get_absolute_time());
-        memset(back_buffer, 0, 240*240*2);
+        memset(back_buffer, 0x00, 240*240*2);
         long time1 = to_us_since_boot(get_absolute_time());
+        Screen s = (Screen) {back_buffer};
+
+        // if (font == 0) {
+        //     draw_rect(s, vec2(0, 0), vec2(100, 100), 0b1111100000000000);
+        // } else {
+        //     draw_string_multiline(s, "Hello, world! this is a big test of the string drawing library and how far it will go. will it word wrap? not sureHello, world! this is a big test of the string drawing library and how far it will go. will it word wrap? not sureHello, world! this is a big test of the string drawing library and how far it will go. will it word wrap? not sureHello, world! this is a big test of the string drawing library and how far it will go. will it word wrap? not sureHello, world! this is a big test of the string drawing library and how far it will go. will it word wrap? not sure", vec2(0, 0), 0, font);
+        // }
         // for (int i = 0; i < 240 * 240; i++) {
         //     back_buffer[i] = ii == i ? 0xffff : 0x0000;
         // }
         // ii += 1;
         // Snake_step(&snakestate, back_buffer);
-        minesweeper_step(&minestate, back_buffer);
+        minesweeper_step(&minestate, s);
         // for (int x = 0; x < 4; x++) {
         //     for (int y = 0; y < 3; y++) {
         //         struct Key state = keypad_get(x, y);

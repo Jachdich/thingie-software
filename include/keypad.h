@@ -6,6 +6,7 @@ struct Key {
     bool held;
     bool pressed;
     bool released;
+    int f_pressed;
 };
 
 // extern struct Key keypad[12];
