@@ -32,7 +32,7 @@ static uint8_t char_callback(int16_t x0, int16_t y0, mf_char character, void *st
     return mf_render_character(data->font, x0, y0, character, &pixel_callback, state);
 }
 
-void draw_string(Screen s, char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font, enum mf_align_t align) {
+void draw_string(Screen s, const char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font, enum mf_align_t align) {
     FontData state = (FontData){
         .buffer = s.buffer,
         .colour = colour,
@@ -55,7 +55,7 @@ bool _multiline_string_callback(const char *str, uint16_t char_count,
     return true;
 }
 
-void draw_string_multiline(Screen s, char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font) {
+void draw_string_multiline(Screen s, const char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font) {
     FontData state = (FontData){
         .buffer = s.buffer,
         .colour = colour,

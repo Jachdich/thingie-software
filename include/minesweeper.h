@@ -17,6 +17,6 @@ typedef struct {
     int num_mines;
     Mine_View view;
 } MineState;
-void minesweeper_step(MineState *state, Screen s);
-MineState minesweeper_init();
+bool minesweeper_step(MineState *state, Screen s);
+void minesweeper_init(MineState *state);
 #endif

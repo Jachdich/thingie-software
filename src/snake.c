@@ -7,8 +7,8 @@
 
 void Snake_new_apple(struct SnakeState *state) {
     // while (true) {
-        state->apple_x = rand() % X_BLOCKS;
-        state->apple_y = rand() % Y_BLOCKS;
+        state->apple.x = rand() % X_BLOCKS;
+        state->apple.y = rand() % Y_BLOCKS;
         // for (int i = state->snake_tail; i != state->snake_head; i = (i + 1) % (X_BLOCKS * Y_BLOCKS)) {
         //     int x = state->snake[i] & 0xFF;
         //     int y = (state->snake[i] >> 8) & 0xFF;
@@ -21,11 +21,10 @@ void Snake_new_apple(struct SnakeState *state) {
 
 void Snake_init(struct SnakeState *state) {
     Snake_new_apple(state);
-    state->vx = 1;
-    state->vy = 0;
+    state->v = vec2(1, 0);
     state->snake_head = 1;
     state->snake_tail = 0;
-    state->snake[0] = (2 << 8) | 2;
+    state->snake[0] = vec2(2, 2);
 }
 
 // TODO
@@ -33,26 +32,26 @@ void Snake_init(struct SnakeState *state) {
 // if, after executing the first in the control buffer, the second command is a no-op; then delete it to make room for more inputs
 
 void Snake_update_velocity(struct SnakeState *state) {
-    if (state->vy == 0) {
+    if (state->v.y == 0) {
         if (keypad_get(2, 0).pressed) {
-            state->vy = -1;
-            state->vx = 0;
+            state->v.y = -1;
+            state->v.x = 0;
             // state->input_this_frame = true;
         }
         if (keypad_get(2, 2).pressed) {
-            state->vy = 1;
-            state->vx = 0;
+            state->v.y = 1;
+            state->v.x = 0;
             // state->input_this_frame = true;
         }
-    } else if (state->vx == 0) {
+    } else if (state->v.x == 0) {
         if (keypad_get(1, 1).pressed) {
-            state->vy = 0;
-            state->vx = -1;
+            state->v.y = 0;
+            state->v.x = -1;
             // state->input_this_frame = true;
         }
         if (keypad_get(3, 1).pressed) {
-            state->vy = 0;
-            state->vx = 1;
+            state->v.y = 0;
+            state->v.x = 1;
             // state->input_this_frame = true;
         }
     }
@@ -62,23 +61,39 @@ inline int wrap(int i) {
     while (i < 0) i += X_BLOCKS * Y_BLOCKS;
     return i % (X_BLOCKS * Y_BLOCKS);
 }
+inline bool vec2_eq(Vec2 a, Vec2 b) {
+    return a.x == b.x && a.y == b.y;
+}
 
-void Snake_step(struct SnakeState *state, Screen s) {
+bool intersect_snake(struct SnakeState *state) {
+    Vec2 head = state->snake[wrap(state->snake_head - 1)];
+    for (int i = state->snake_tail; i != wrap(state->snake_head - 1); i = wrap(i + 1)) {
+        if (vec2_eq(state->snake[i], head)) return true;
+    }
+    return false;
+}
+
+bool Snake_step(struct SnakeState *state, Screen s) {
     long time = to_ms_since_boot(get_absolute_time());
     Snake_update_velocity(state);
     keypad_next_frame();
-    int head_x = state->snake[wrap(state->snake_head - 1)] & 0xFF;
-    int head_y = (state->snake[wrap(state->snake_head - 1)] >> 8) & 0xFF;
-    head_x += state->vx;
-    head_y += state->vy;
-    if (head_x < X_BLOCKS && head_x >= 0 && head_y < X_BLOCKS && head_y >= 0) {
-        state->snake[state->snake_head] = (head_y << 8) | head_x;
+    Vec2 head = state->snake[wrap(state->snake_head - 1)];
+    head.x += state->v.x;
+    head.y += state->v.y;
+    if (head.x < X_BLOCKS && head.x >= 0 && head.y < X_BLOCKS && head.y >= 0) {
+        state->snake[state->snake_head] = head;
         state->snake_head = wrap(state->snake_head + 1);
-        if (head_x == state->apple_x && head_y == state->apple_y) {
+        if (head.x == state->apple.x && head.y == state->apple.y) {
             Snake_new_apple(state);
         } else {
              state->snake_tail = wrap(state->snake_tail + 1);
         }
+    } else {
+        return false;
+    }
+
+    if (intersect_snake(state)) {
+        return false;
     }
 
     // for (int x = 0; x < X_BLOCKS; x++) {
@@ -108,25 +123,24 @@ void Snake_step(struct SnakeState *state, Screen s) {
     // }
 
     for (int i = state->snake_tail; i != state->snake_head; i = (i + 1) % (X_BLOCKS * Y_BLOCKS)) {
-        int x = state->snake[i] & 0xFF;
-        int y = (state->snake[i] >> 8) & 0xFF;
+        Vec2 pos = state->snake[i];
 
         if ((i + 1) % (X_BLOCKS * Y_BLOCKS) != state->snake_head) {
-            draw_rect(s, vec2(x * BLOCK_WIDTH, y * BLOCK_WIDTH), vec2(8, 8), 0b0000011111100000);
+            draw_rect(s, vec2(pos.x * BLOCK_WIDTH, pos.y * BLOCK_WIDTH), vec2(8, 8), 0b0000011111100000);
         } else {
-            draw_rect(s, vec2(x * BLOCK_WIDTH, y * BLOCK_WIDTH), vec2(8, 8), 0b1100111111100000);
+            draw_rect(s, vec2(pos.x * BLOCK_WIDTH, pos.y * BLOCK_WIDTH), vec2(8, 8), 0b1100111111100000);
         }
         if ((i + 1) % (X_BLOCKS * Y_BLOCKS) != state->snake_head) {
-            int x2 = state->snake[(i + 1) % (X_BLOCKS * Y_BLOCKS)] & 0xFF;
-            int y2 = (state->snake[(i + 1) % (X_BLOCKS * Y_BLOCKS)] >> 8) & 0xFF;
-            draw_rect(s, vec2((x+x2) * BLOCK_WIDTH / 2, (y + y2) * BLOCK_WIDTH / 2), vec2(8, 8), 0b0000011000000000);
+            Vec2 pos2 = vec2_add(pos, state->snake[(i + 1) % (X_BLOCKS * Y_BLOCKS)]);
+            draw_rect(s, vec2(pos2.x * BLOCK_WIDTH / 2, pos2.y * BLOCK_WIDTH / 2), vec2(8, 8), 0b0000011000000000);
         }
     }
-    draw_rect(s, vec2(state->apple_x * BLOCK_WIDTH, state->apple_y * BLOCK_WIDTH), vec2(8, 8), 0b1111100000000000);
+    draw_rect(s, vec2(state->apple.x * BLOCK_WIDTH, state->apple.y * BLOCK_WIDTH), vec2(8, 8), 0b1111100000000000);
 
     long time2;
     while ((time2 = to_ms_since_boot(get_absolute_time())) - time < (1000.0 / 6.0)) {
         sleep_ms(1);
     }
+    return true;
 }
 

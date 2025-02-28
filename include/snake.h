@@ -10,12 +10,12 @@
 #define BLOCK_WIDTH (SCREEN_WIDTH / X_BLOCKS)
 
 struct SnakeState {
-    int apple_x, apple_y;
-    int vx, vy;
-    int snake[X_BLOCKS * Y_BLOCKS];
+    Vec2 apple;
+    Vec2 v;
+    Vec2 snake[X_BLOCKS * Y_BLOCKS];
     int snake_head, snake_tail;
 };
 
 void Snake_init(struct SnakeState *state);
-void Snake_step(struct SnakeState *state, Screen s);
+bool Snake_step(struct SnakeState *state, Screen s);
 #endif

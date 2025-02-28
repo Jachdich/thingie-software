@@ -423,6 +423,7 @@ int count_neighbours(MineState *state, int x, int y) {
 }
 
 void generate_board(MineState *state) {
+    memset(state->board, 0, 26 * 26 * sizeof(*state->board));
     for (int i = 0; i < state->num_mines; i++) {
         int pos;
         //make sure the chosen pos doesn't already have a mine
@@ -483,11 +484,7 @@ void draw_tile(int x, int y, MineState *state, Screen s) {
     uint8_t tile = state->board[y * state->width + x];
     x = x * state->cell_rad;// + 1;
     y = y * state->cell_rad;// + 1;
-    int w = state->cell_rad- 2;
-    int h = state->cell_rad- 2;
     
-    uint16_t revealed_col = 0b1100011000011000;
-    uint16_t unrevealed_col = 0b0111001110001110;
     const int flagpole_colour = 0; // black
     const int flag_colour = 0b1111100000000000; // red
     
@@ -495,7 +492,6 @@ void draw_tile(int x, int y, MineState *state, Screen s) {
 
     if (tile & REVEALED) {
         uint8_t neighbours = tile & 0x0F;
-        uint16_t col = neighbour_colours[neighbours];
 
         draw_palette(s, big ? big_revealed : small_revealed, (Vec2){x, y});
         if (neighbours > 0) {
@@ -559,7 +555,7 @@ bool check_win(MineState *state) {
     return unrevealed == state->num_mines;
 }
 
-MineState minesweeper_init() {
+void minesweeper_init(MineState *state) {
     //semi random ish, read from uninitialised analog pin
     // srand(analogRead(A7) ^ micros());
     srand(to_us_since_boot(get_absolute_time()));
@@ -573,22 +569,40 @@ MineState minesweeper_init() {
     int default_num_mines = 42;
     int cell_rad = default_width > 16 ? 9 : 15;
 
-    MineState state = {
-        .selected_x = 0, .selected_y = 0,
-        .width = default_width, .height = default_height, .cell_rad = cell_rad,
-        .num_mines = default_num_mines,
-        .view = MINEVIEW_INIT_MENU,
-    };
-    memset(state.board, 0, 26 * 26);
-    
-    return state;
+    state->selected_x = 0; 
+    state->selected_y = 0;
+    state->width = default_width;
+    state->height = default_height;
+    state->cell_rad = cell_rad;
+    state->num_mines = default_num_mines;
+    state->view = MINEVIEW_INIT_MENU;
 }
 
-Vec2 vec2_add(Vec2 a, Vec2 b) {
-    return vec2(a.x + b.x, a.y + b.y);
+bool draw_endgame(MineState *state, Screen s, const char *message, const struct mf_font_s *font) {
+    bool go = keypad_get(2, 1).pressed;
+    if (keypad_get(2, 0).pressed) {
+        state->selected_x -= 1;
+        if (state->selected_x < 0) state->selected_x = 0;
+    }
+    if (keypad_get(2, 2).pressed) {
+        state->selected_x += 1;
+        if (state->selected_x > 1) state->selected_x = 1;
+    }
+    keypad_next_frame();
+    draw_string(s, message, vec2(60, 50), 0xffff, font, MF_ALIGN_LEFT);
+    draw_string(s, "Again", vec2(60, 62), 0xffff, font, MF_ALIGN_LEFT);
+    draw_string(s, "Quit", vec2(60, 74), 0xffff, font, MF_ALIGN_LEFT);
+    draw_string(s, ">", vec2(50, 62 + 12 * state->selected_x), 0xffff, font, MF_ALIGN_LEFT);
+    if (state->selected_x == 0 && go) {
+        state->view = MINEVIEW_INIT_MENU;
+    }
+    if (state->selected_x == 1 && go) return false;
+    return true;
 }
 
-void minesweeper_step(MineState *state, Screen s) {
+bool minesweeper_step(MineState *state, Screen s) {
+    static const struct mf_font_s *font = NULL; // TODO not static....
+    if (font == NULL) font = mf_find_font("DejaVuSans12");
     switch (state->view) {
         case MINEVIEW_PLAYING:
             state->selected_x += (keypad_get(3, 1).pressed) && state->selected_x < state->width - 1;
@@ -617,10 +631,10 @@ void minesweeper_step(MineState *state, Screen s) {
         case MINEVIEW_INIT_MENU: {
             int delta = 0;
             bool go = keypad_get(2, 1).pressed;
-            if (keypad_get(1, 1).pressed || keypad_get(1, 1).f_pressed > 30 && keypad_get(1, 1).f_pressed % 4 == 0) {
+            if (keypad_get(1, 1).pressed || (keypad_get(1, 1).f_pressed > 30 && keypad_get(1, 1).f_pressed % 4 == 0)) {
                 delta = -1;
             }
-            if (keypad_get(3, 1).pressed || keypad_get(3, 1).f_pressed > 30 && keypad_get(3, 1).f_pressed % 4 == 0) {
+            if (keypad_get(3, 1).pressed || (keypad_get(3, 1).f_pressed > 30 && keypad_get(3, 1).f_pressed % 4 == 0)) {
                 delta = 1;
             }
             if (keypad_get(2, 0).pressed) {
@@ -656,12 +670,12 @@ void minesweeper_step(MineState *state, Screen s) {
 
             uint16_t x0 = 50;
             uint16_t y0 = 50;
-            const struct mf_font_s *font = mf_find_font("DejaVuSans12");
 
             if (state->selected_x == 3) {
                 if (go) {
                     state->selected_x = 0;
                     generate_board(state);
+                    keypad_next_frame(); // stop button pressing going through to the game;
                     state->view = MINEVIEW_PLAYING;
                     state->cell_rad = (state->width > 16 || state->height > 16) ? 9 : 15;
                     break;
@@ -689,21 +703,14 @@ void minesweeper_step(MineState *state, Screen s) {
             buf[3] = 0;
             draw_string(s, buf, vec2(x0 + 60, y0 + 24), 0xffff, font, MF_ALIGN_LEFT);
 
-            // Vec2 sel_pos;
-            // if (state->selected_x == 0) sel_pos = vec2(0, 0);
-            // if (state->selected_x == 1) sel_pos = vec2(0, 12);
-            // if (state->selected_x == 2) sel_pos = vec2(0, 24);
             draw_string(s, ">", vec2(x0, y0 + 12 * state->selected_x), 0xffff, font, MF_ALIGN_LEFT);
             break;
         }
-        case MINEVIEW_COMPLETE:
-            keypad_next_frame();
-            break;
-        case MINEVIEW_GAME_OVER:
-            keypad_next_frame();
-            break;
+        case MINEVIEW_COMPLETE: return draw_endgame(state, s, "Success", font);
+        case MINEVIEW_GAME_OVER:return draw_endgame(state, s, "Game Over", font);
         default:
             keypad_next_frame();
             break;
     }
+    return true;
 }
