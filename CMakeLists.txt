@@ -18,6 +18,7 @@ add_executable(main
     src/snake.c
     src/minesweeper.c
     src/drawing.c
+    src/tetris.c
 
     lib/mcufont/mf_bwfont.c
     lib/mcufont/mf_font.c

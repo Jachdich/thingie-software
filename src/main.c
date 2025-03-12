@@ -1,5 +1,6 @@
 // #include "../include/st7789.h"
 #include "../include/drawing.h"
+#include "../include/tetris.h"
 #include "../include/st7789_pio.h"
 #include "../include/keypad.h"
 #include "../include/snake.h"
@@ -117,6 +118,10 @@ void draw_menu(Screen s, void *game_state, MenuState *ms) {
                 break;
             case MAINVIEW_MINESWEEPER:
                 minesweeper_init(game_state);
+                break;
+            case MAINVIEW_TETRIS:
+                Tetris_init(game_state);
+                break;
             default: break;
         }
     }
@@ -180,6 +185,11 @@ int main() {
                 break;
             case MAINVIEW_MINESWEEPER:
                 if (!minesweeper_step(game_state, s)) {
+                    ms.view = MAINVIEW_MENU;
+                }
+                break;
+            case MAINVIEW_TETRIS:
+                if (!Tetris_step(game_state, s)) {
                     ms.view = MAINVIEW_MENU;
                 }
                 break;
