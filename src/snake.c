@@ -57,12 +57,9 @@ void Snake_update_velocity(struct SnakeState *state) {
     }
 }
 
-inline int wrap(int i) {
+static int wrap(int i) {
     while (i < 0) i += X_BLOCKS * Y_BLOCKS;
     return i % (X_BLOCKS * Y_BLOCKS);
-}
-inline bool vec2_eq(Vec2 a, Vec2 b) {
-    return a.x == b.x && a.y == b.y;
 }
 
 bool intersect_snake(struct SnakeState *state) {

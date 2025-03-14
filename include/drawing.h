@@ -33,7 +33,6 @@ void draw_mask(Screen s, MaskImage img, Vec2 pos, uint16_t colour);
 void draw_palette(Screen s, PaletteImage img, Vec2 pos);
 void draw_string(Screen s, const char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font, enum mf_align_t align);
 void draw_string_multiline(Screen s, const char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font);
-inline Vec2 vec2_add(Vec2 a, Vec2 b) {
-    return vec2(a.x + b.x, a.y + b.y);
-}
+Vec2 vec2_add(Vec2 a, Vec2 b);
+bool vec2_eq(Vec2 a, Vec2 b);
 #endif

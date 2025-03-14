@@ -122,3 +122,12 @@ void draw_palette(Screen s, PaletteImage img, Vec2 pos) {
         }
     }
 }
+
+// TODO these would probably benefit from inlining
+// see https://stackoverflow.com/questions/60133817/how-do-i-inline-a-function-from-another-translation-unit
+Vec2 vec2_add(Vec2 a, Vec2 b) {
+    return vec2(a.x + b.x, a.y + b.y);
+}
+bool vec2_eq(Vec2 a, Vec2 b) {
+    return a.x == b.x && a.y == b.y;
+}

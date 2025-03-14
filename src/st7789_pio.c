@@ -10,6 +10,7 @@
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "hardware/gpio.h"
+#include "pico/time.h"
 
 #include "../include/st7789_pio.h"
 

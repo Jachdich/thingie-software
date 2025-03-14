@@ -1,0 +1,1 @@
+void st7789_lcd_put(int n);

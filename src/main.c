@@ -6,6 +6,7 @@
 #include "../include/snake.h"
 #include "../include/minesweeper.h"
 #include "pico/time.h"
+#include "pico/stdlib.h"
 #include "hardware/clocks.h"
 #include "hardware/pwm.h"
 #include "pico/multicore.h"
@@ -13,17 +14,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
-
-// const struct st7789_config lcd_config = {
-//     .spi      = spi0,
-//     .gpio_din = 19,
-//     .gpio_clk = 18,
-//     .gpio_cs  = 28,
-//     .gpio_dc  = 20,
-//     .gpio_rst = 21,
-//     .gpio_bl  = 26,
-// };
-// const int framrate = 60;
 
 uint16_t framebuffer0[240*240];
 uint16_t framebuffer1[240*240];
@@ -139,7 +129,11 @@ void draw_menu(Screen s, void *game_state, MenuState *ms) {
 
 
 #define PIN_BL 26
+#ifdef TESTING
+int main_() {
+#else
 int main() {
+#endif
     stdio_init_all();
 
     // Initialise keypad + read manually once, to check whether to wait (for programming)
