@@ -1,6 +1,5 @@
 #include "../include/drawing.h"
 #include "../include/snake.h"
-#include "../include/st7789_pio.h"
 #include "../include/keypad.h"
 #include <stdlib.h>
 #include "pico/time.h"

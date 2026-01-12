@@ -105,7 +105,7 @@ Vec2 width(Piece p, uint8_t rotation) {
 }
 
 void Tetris_init(TetrisState *state) {
-    memset(state->blocks, EMPTY, X_BLOCKS * Y_BLOCKS);
+    for (int i = 0; i < X_BLOCKS * Y_BLOCKS; i++) state->blocks[i] = EMPTY;
     state->current_piece = I;
     state->rotation = 0;
     state->pos = vec2(0, 0);

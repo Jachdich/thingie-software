@@ -8,17 +8,18 @@ project(my_project)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-add_definitions("-W -Wall -Wunreachable-code  -Wwrite-strings -Wpointer-arith -Wbad-function-cast -Wcast-align -Wcast-qual")
+add_definitions("-W -Wall -Wunreachable-code  -Wwrite-strings -Wpointer-arith -Wbad-function-cast -Wcast-align -Wcast-qual -fstack-usage")
 
 add_executable(main
     src/main.c
-    src/st7789_pio.c
     src/keypad.c
     # src/st7789.c
     src/snake.c
     src/minesweeper.c
     src/drawing.c
     src/tetris.c
+    src/sgtl5000.c
+    src/i2s.c
 
     lib/mcufont/mf_bwfont.c
     lib/mcufont/mf_font.c
@@ -28,6 +29,18 @@ add_executable(main
     lib/mcufont/mf_justify.c
     lib/mcufont/mf_rlefont.c
     lib/mcufont/mf_wordwrap.c
+
+    lib/st7789/st7789_pio.c
+
+    lib/libmad/bit.c
+    lib/libmad/fixed.c
+    lib/libmad/frame.c
+    lib/libmad/huffman.c
+    lib/libmad/layer3.c
+    lib/libmad/stream.c
+    lib/libmad/synth.c
+    lib/libmad/timer.c
+    lib/libmad/version.c
 )
 
 # Add pico_stdlib library which aggregates commonly used features
@@ -39,4 +52,5 @@ pico_enable_stdio_uart(main 0)
 
 # create map/bin/hex/uf2 file in addition to ELF.
 pico_add_extra_outputs(main)
-pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/src/st7789_lcd.pio)
+pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/lib/st7789/st7789_lcd.pio)
+pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/i2s.pio)

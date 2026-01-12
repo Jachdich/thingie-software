@@ -16,7 +16,6 @@ static void pixel_callback(int16_t x, int16_t y, uint8_t count, uint8_t alpha, v
     uint8_t g = ((data->colour >> 5) & 0b111111) * alpha / 255;
     uint8_t b = ((data->colour >> 0) & 0b11111) * alpha / 255;
     while (count--) {
-        /* your code goes here, ex: drawPixel(x, y, alpha, color::black); */
         uint16_t bg = data->buffer[y * 240 + x];
         uint8_t bg_r = ((bg >> 11) & 0b11111) * (255 - alpha) / 255 + r;
         uint8_t bg_g = ((bg >> 5) & 0b111111) * (255 - alpha) / 255 + g;
@@ -78,6 +77,31 @@ void draw_yline(Screen s, Vec2 pos, int len, uint16_t col) {
     }
 }
 
+void draw_line(Screen s, Vec2 a, Vec2 b, uint16_t colour) {
+    int dx =  abs(b.x-a.x);
+    int sx = a.x<b.x ? 1 : -1;
+    int dy = -abs(b.y-a.y);
+    int sy = a.y<b.y ? 1 : -1;
+    int err = dx+dy;
+    int e2;
+
+    while (true) {
+        s.buffer[a.y * 240 + a.x] = colour;
+        if (a.x == b.x && a.y == b.y)
+            break;
+        e2 = 2*err;
+
+        if (e2 >= dy) {
+            err += dy;
+            a.x += sx;
+        }
+        if (e2 <= dx) {
+            err += dx;
+            a.y += sy;
+        }
+    }
+}
+
 Vec2 vec2(int x, int y) {
     return (Vec2){x, y};
 }
@@ -90,11 +114,12 @@ void draw_rect(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
     }
 }
 
-void draw_mask(Screen s, MaskImage img, Vec2 pos, uint16_t colour) {
+void draw_mask(Screen s, MaskImage img, Vec2 pos, const uint16_t *colours) {
     for (int i = 0; i < img.size.y; i++) {
         for (int j = 0; j < img.size.x; j++) {
-            if (img.data[i * img.size.y + j]) {
-                s.buffer[pos.x + j + (pos.y + i) * 240] = colour;
+            uint8_t pix = img.data[i * img.size.y + j];
+            if (pix != 0) {
+                s.buffer[pos.x + j + (pos.y + i) * 240] = colours[pix - 1];
             }
         }
     }

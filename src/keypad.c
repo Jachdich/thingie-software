@@ -6,8 +6,8 @@
 #include <string.h>
 #include "pico/time.h"
 
-int button_pins[] = {11, 10, 12, 13, 15, 14};
-int common_pins[] = {2, 3};
+int button_pins[] = {10, 11, 12, 13, 15, 14};
+int common_pins[] = {3, 2};
 
 struct Key keypad[12];
 struct Key keypad_last_frame[12];
@@ -46,7 +46,7 @@ void keypad_next_frame() {
     }
 }
 
-inline void set_key(int half_x, int half_y, int i, uint32_t now, struct Key *pad, struct Key *last_pad) {
+void set_key(int half_x, int half_y, int i, uint32_t now, struct Key *pad, struct Key *last_pad) {
     int idx = half_y * 4 + half_x;
     bool state = !gpio_get(button_pins[i]);
     if (!state && now - times[idx] < 10) {

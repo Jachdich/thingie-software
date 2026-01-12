@@ -70,6 +70,7 @@ void sleep_ms(uint32_t ms) {
 }
 
 void sleep_us(uint64_t us) {
+    // printf("us: %lu\n", us);
     struct timespec ts = (struct timespec){.tv_sec = us / 1000000, .tv_nsec = (us % 1000000) * 1000 };
     nanosleep(&ts, &ts);
 }
