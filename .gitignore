@@ -1,3 +1,5 @@
 build
 sim/obj
 sim/sw_obj
+sim/lib_obj
+sim/main
