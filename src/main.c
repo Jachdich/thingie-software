@@ -375,8 +375,7 @@ int main() {
 
         #else
 
-
-        if (keypad_get(0, 0).f_pressed > 160) {
+        if (keypad_get(0, 0).held && time1 - keypad_get(0, 0).us_pressed_at > 3 * 1000 * 1000) {
             ms.view = MAINVIEW_MENU;
         }
        

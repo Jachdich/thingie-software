@@ -61,6 +61,7 @@ void set_key(int half_x, int half_y, int i, uint32_t now, struct Key *pad, struc
     }
     if (state && !last_pad[idx].held) {
         pad[idx].pressed = true;
+        pad[idx].us_pressed_at = to_us_since_boot(get_absolute_time());
     }
     if (!state && last_pad[idx].held) {
         pad[idx].released = true;
