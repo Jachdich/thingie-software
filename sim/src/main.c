@@ -1,6 +1,14 @@
 #include <pthread.h>
 #include "../include/_time_internal.h"
+#include "../../include/drawing.h"
 int main_(void);
+
+int music_step(void *a, Screen s) {
+    return 0;
+}
+void music_init(void *a) {
+    
+}
 
 int main() {
     pthread_t ptid; 

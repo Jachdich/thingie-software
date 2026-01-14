@@ -1,5 +1,5 @@
-// #include "../include/st7789.h"
 #include "../include/drawing.h"
+#include "../include/as5600.h"
 #include "../include/tetris.h"
 #include "../lib/st7789/st7789_pio.h"
 #include "../include/keypad.h"
@@ -31,25 +31,22 @@ uint16_t *back_buffer;
 
 uint8_t *game_arena[32*1024]; // just allocate 32kiB for now...
 
-#define AS5600_ADDR 0x36
-
-uint16_t as5600_read_raw_angle() {
-    uint8_t ret[2];
-    uint8_t reg = 0x0E;
-    i2c_write_blocking(i2c_default, AS5600_ADDR, &reg, 1, true);
-    i2c_read_blocking(i2c_default, AS5600_ADDR, ret, 2, false);
-    return (ret[0] << 8 | ret[1]);
-}
-
-uint16_t as5600_read_adc() {
-    uint8_t ret[2];
-    uint8_t reg = 0x1A;
-    i2c_write_blocking(i2c_default, AS5600_ADDR, &reg, 1, true);
-    i2c_read_blocking(i2c_default, AS5600_ADDR, ret, 2, false);
-    return ret[0] << 8 | ret[1];
-}
-
 void st7789_lcd_put(PIO a, uint b, uint8_t n);
+
+// extern uint32_t read_ptr, write_ptr;
+
+
+// #define FPM_ARM
+// #define BUFFER_SIZE (1152 * 7)
+// #include "../lib/libmad/mad.h"
+// struct MusicState {
+//     struct mad_stream stream;
+//     struct mad_frame frame;
+//     struct mad_synth synth;
+//     float volume;
+//     int16_t samples[BUFFER_SIZE];
+// };
+
 
 void core1_entry() {
     alarm_pool_t *pool = alarm_pool_create_with_unused_hardware_alarm(1);
@@ -58,8 +55,8 @@ void core1_entry() {
     
     uint16_t **buffer = &front_buffer;
     ST7789 st = st7789_init();
+    // struct MusicState *state = (struct MusicState*)game_arena;
     while (1) {
-        // long time = to_us_since_boot(get_absolute_time());
         uint32_t _ = multicore_fifo_pop_blocking();
 
         st7789_start_pixels(st.pio, st.sm);
@@ -67,14 +64,11 @@ void core1_entry() {
             uint16_t colour = (*buffer)[i];
             st7789_lcd_put(st.pio, st.sm, colour >> 8);
             st7789_lcd_put(st.pio, st.sm, colour & 0xff);
-            // st7789_lcd_put(0, 0, colour >> 8);
-            // st7789_lcd_put(0, 0, colour & 0xff);
-            // printf("%d\n", colour);
         }
-        // long time2;
-        // while ((time2 = to_us_since_boot(get_absolute_time())) - time < 1000000 / framerate) {
-        //     sleep_us(100);
-        // }
+
+        
+        // maybe limit the framerate
+        // consider interrupts
     }
 }
 
@@ -166,7 +160,7 @@ void draw_menu(Screen s, void *game_state, MenuState *ms) {
                 // set_on(on = !on);
                 // ms->view = MAINVIEW_MENU;
                 // ms->view = MAINVIEW_MUSIC;
-                // music_init(game_state);
+                music_init(game_state);
                 break;
             }
             case MAINVIEW_BRIGHTNESS:
@@ -399,9 +393,9 @@ int main() {
                 }
                 break;
             case MAINVIEW_MUSIC:
-                // if (!music_step(game_state, s)) {
-                //     ms.view = MAINVIEW_MENU;
-                // }
+                if (!music_step(game_state, s)) {
+                    ms.view = MAINVIEW_MENU;
+                }
                 break;
             case MAINVIEW_BRIGHTNESS:
                 ms.view = MAINVIEW_MENU; // this can't really be clicked on

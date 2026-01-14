@@ -21,7 +21,7 @@ typedef struct {
 } PaletteImage;
 
 typedef struct {
-    bool *data;
+    uint8_t *data;
     Vec2 size;
 } MaskImage;
 

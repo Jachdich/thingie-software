@@ -32,7 +32,7 @@ const uint16_t neighbour_colours[] = {
     0b1000010000010000,
 };
 
-bool big_numbers[] = {
+uint8_t big_numbers[] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,
@@ -255,7 +255,7 @@ unsigned char small_unrevealed_data[] = {
     };
 
 // TODO bit pack these?
-bool small_numbers[] = {
+uint8_t small_numbers[] = {
     0,0,0,0,0,0,0,0,0,
     0,0,0,0,1,0,0,0,0,
     0,0,0,1,1,0,0,0,0,
