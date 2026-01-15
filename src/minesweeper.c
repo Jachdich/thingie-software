@@ -558,11 +558,11 @@ bool draw_endgame(MineState *state, Screen s, const char *message, const struct 
     bool go = keypad_get(2, 1).pressed;
     if (keypad_get(2, 0).pressed) {
         state->selected_x -= 1;
-        if (state->selected_x < 0) state->selected_x = 0;
+        if (state->selected_x < 0) state->selected_x = 1;
     }
     if (keypad_get(2, 2).pressed) {
         state->selected_x += 1;
-        if (state->selected_x > 1) state->selected_x = 1;
+        if (state->selected_x > 1) state->selected_x = 0;
     }
     keypad_next_frame();
     draw_string(s, message, vec2(60, 50), 0xffff, font, MF_ALIGN_LEFT);
@@ -615,11 +615,11 @@ bool minesweeper_step(MineState *state, Screen s) {
             }
             if (keypad_get(2, 0).pressed) {
                 state->selected_x -= 1;
-                if (state->selected_x < 0) state->selected_x = 0;
+                if (state->selected_x < 0) state->selected_x = 3;
             }
             if (keypad_get(2, 2).pressed) {
                 state->selected_x += 1;
-                if (state->selected_x > 3) state->selected_x = 3;
+                if (state->selected_x > 3) state->selected_x = 0;
             }
             keypad_next_frame();
             if (state->selected_x == 0) {
