@@ -1,10 +1,11 @@
 // #include "../include/st7789.h"
+#include "../lib/st7789/st7789_pio.h"
 #include "../include/drawing.h"
 #include "../include/tetris.h"
-#include "../lib/st7789/st7789_pio.h"
 #include "../include/keypad.h"
 #include "../include/snake.h"
 #include "../include/minesweeper.h"
+#include "../include/scroller.h"
 #include "pico/time.h"
 #include "pico/stdlib.h"
 #include "hardware/clocks.h"
@@ -83,15 +84,16 @@ enum MainView {
     MAINVIEW_SNAKE,
     MAINVIEW_MINESWEEPER,
     MAINVIEW_TETRIS,
+    MAINVIEW_SCROLLER,
     MAINVIEW_MUSIC,
     MAINVIEW_BRIGHTNESS,
 };
 
 
 char bri[25] = "Brightness: 100.0%";
-const char *options[] = {"Snake", "Minesweeper", "Tetris", "Music", bri};
-const enum MainView states[] = {MAINVIEW_SNAKE, MAINVIEW_MINESWEEPER, MAINVIEW_TETRIS, MAINVIEW_MUSIC, MAINVIEW_BRIGHTNESS};
-const int num_states = 5;
+const char *options[] = {"Snake", "Minesweeper", "Tetris", "Scroller", "Music", bri};
+const enum MainView states[] = {MAINVIEW_SNAKE, MAINVIEW_MINESWEEPER, MAINVIEW_TETRIS, MAINVIEW_SCROLLER, MAINVIEW_MUSIC, MAINVIEW_BRIGHTNESS};
+const int num_states = 6;
 
 typedef struct {
     enum MainView view;
@@ -161,6 +163,9 @@ void draw_menu(Screen s, void *game_state, MenuState *ms) {
                 break;
             case MAINVIEW_TETRIS:
                 Tetris_init(game_state);
+                break;
+            case MAINVIEW_SCROLLER:
+                Scroller_init(game_state);
                 break;
             case MAINVIEW_MUSIC: {
                 // set_on(on = !on);
@@ -396,6 +401,11 @@ int main() {
                 break;
             case MAINVIEW_TETRIS:
                 if (!Tetris_step(game_state, s)) {
+                    ms.view = MAINVIEW_MENU;
+                }
+                break;
+            case MAINVIEW_SCROLLER:
+                if (!Scroller_step(game_state, s)) {
                     ms.view = MAINVIEW_MENU;
                 }
                 break;
