@@ -2,6 +2,7 @@
 #include "../lib/mcufont/mcufont.h"
 #include "../include/drawing.h"
 #include <string.h>
+#include <stdlib.h>
 
 typedef struct {
     uint16_t *buffer;
@@ -71,9 +72,9 @@ void draw_xline(Screen s, Vec2 pos, int len, uint16_t col) {
     }
 }
 
-void draw_yline(Screen s, Vec2 pos, int len, uint16_t col) {
+void draw_yline(Screen s, Vec2 pos, int len, uint16_t row) {
     for (int y = pos.y; y < pos.y + len; y++) {
-        s.buffer[y * 240 + pos.x] = col;
+        s.buffer[y * 240 + pos.x] = row;
     }
 }
 
