@@ -41,6 +41,8 @@ add_executable(main
     lib/libmad/synth.c
     lib/libmad/timer.c
     lib/libmad/version.c
+        src/scroller.c
+        include/scroller.h
 )
 
 # Add pico_stdlib library which aggregates commonly used features
