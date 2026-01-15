@@ -144,11 +144,11 @@ void set_on(int);
 void draw_menu(Screen s, void *game_state, MenuState *ms) {
     if (keypad_get(2, 0).pressed) {
         ms->selected_item -= 1;
-        if (ms->selected_item < 0) ms->selected_item = 0;
+        if (ms->selected_item < 0) ms->selected_item = num_states - 1;
     }
     if (keypad_get(2, 2).pressed) {
         ms->selected_item += 1;
-        if (ms->selected_item >= num_states) ms->selected_item = num_states - 1;
+        if (ms->selected_item >= num_states) ms->selected_item = 0;
     }
     if (keypad_get(2, 1).pressed) {
         ms->view = states[ms->selected_item];
