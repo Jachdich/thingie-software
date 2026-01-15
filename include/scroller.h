@@ -1,0 +1,62 @@
+//
+// Created by ignacy on 12/01/2026.
+//
+
+#ifndef _SCROLLER_H
+#define _SCROLLER_H
+
+#include <stdbool.h>
+#include <stdint.h>
+#include "../include/drawing.h"
+
+#define TILE_SIZE 20
+#define SCREEN_W 240
+#define SCREEN_H 240
+#define INFO_H 20
+
+#define MAP_W 13
+#define MAP_H 10
+
+enum Tile {
+    TILE_EMPTY = 0,
+    TILE_GROUND,
+    TILE_PLATFORM,
+    TILE_BLOCK,
+    TILE_BG_BLOCK,
+    TILE_COIN
+};
+
+struct Player {
+    Vec2 pos;
+    Vec2 vel;
+    bool on_ground;
+};
+
+typedef enum {
+    SCROLLER_VIEW_GAME_OVER,
+    SCROLLER_VIEW_NEW_SCORE,
+    SCROLLER_VIEW_PLAYING,
+    SCROLLER_VIEW_INIT
+} Scroller_View;
+
+struct ScrollerState {
+	int selected;
+	Scroller_View view;
+
+    struct Player player;
+    uint16_t map[MAP_H][MAP_W];
+
+    int score;
+    int highscore;
+    int seconds_alive;
+    int last_time_ms;
+
+    float scroll_timer;
+    float scroll_speed; // tiles per second
+};
+
+
+void Scroller_init(struct ScrollerState *state);
+bool Scroller_step(struct ScrollerState *state, Screen s);
+
+#endif
