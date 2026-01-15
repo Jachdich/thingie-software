@@ -118,7 +118,9 @@ void draw_rect(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
 void draw_mask(Screen s, MaskImage img, Vec2 pos, const uint16_t *colours) {
     for (int i = 0; i < img.size.y; i++) {
         for (int j = 0; j < img.size.x; j++) {
-            uint8_t pix = img.data[i * img.size.y + j];
+            uint8_t pix = img.data[i * img.size.x + j];
+            if (pos.x + j >= 240 || pos.y + i >= 240) continue;
+            if (pos.x + j < 0 || pos.y + i < 0) continue;
             if (pix != 0) {
                 s.buffer[pos.x + j + (pos.y + i) * 240] = colours[pix - 1];
             }
@@ -140,10 +142,11 @@ void draw_mask(Screen s, MaskImage img, Vec2 pos, const uint16_t *colours) {
 void draw_palette(Screen s, PaletteImage img, Vec2 pos) {
     for (int i = 0; i < img.size.y; i++) {
         for (int j = 0; j < img.size.x; j++) {
-            // if (x + j >= 240 || y + i >= 240) {
+            if (pos.x + j >= 240 || pos.y + i >= 240) continue;
+            if (pos.x + j < 0 || pos.y + i < 0) continue;
             //     printf("Out of range (coloured) %d %d %d %d\n", x, j, y, i);
             // }
-            unsigned char px = img.data[i * img.size.y + j];
+            unsigned char px = img.data[i * img.size.x + j];
             s.buffer[pos.x + j + (pos.y + i) * 240] = img.palette[px];
         }
     }
