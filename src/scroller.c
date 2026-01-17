@@ -418,6 +418,7 @@ static void handle_reset(struct ScrollerState *s) {
     s->scroll_timer = 0.0f;
     s->scroll_speed = 0.8f;
 
+    s->frame_start = 0;
     s->last_time_ms = to_ms_since_boot(get_absolute_time());;
     s->time_accum = 0.0f;
 
@@ -511,14 +512,12 @@ bool Scroller_endgame(struct ScrollerState *s, Screen screen, const char *messag
 
 bool Scroller_main(struct ScrollerState *s, Screen screen) {
     /* -------- TIME -------- */
-    static long frame_start = 0;
-
     long now = to_ms_since_boot(get_absolute_time());
-    if (frame_start == 0)
-        frame_start = now;
+    if (s->frame_start == 0)
+        s->frame_start = now;
 
-    float dt = (now - frame_start) / 1000.0f;
-    frame_start = now;
+    float dt = (now - s->frame_start) / 1000.0f;
+    s->frame_start = now;
 
     s->time_accum += dt;
 
@@ -670,10 +669,13 @@ bool Scroller_step(struct ScrollerState *s, Screen screen) {
 	switch (s->view) {
 		case SCROLLER_VIEW_PLAYING:
 			return Scroller_main(s, screen);
+	        break;
 		case SCROLLER_VIEW_NEW_SCORE:
 			return Scroller_endgame(s, screen, "New High Score!", font);
+	        break;
 		case SCROLLER_VIEW_GAME_OVER:
 		    return Scroller_endgame(s, screen, "Game Over :(", font);
+	        break;
 		default:
             keypad_next_frame();
             break;

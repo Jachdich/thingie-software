@@ -50,6 +50,8 @@ struct ScrollerState {
     int score;
     int highscore;
     int seconds_alive;
+
+    long frame_start;
     int last_time_ms;
     float time_accum;
 
