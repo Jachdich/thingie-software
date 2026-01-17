@@ -147,7 +147,8 @@ void draw_palette(Screen s, PaletteImage img, Vec2 pos) {
             //     printf("Out of range (coloured) %d %d %d %d\n", x, j, y, i);
             // }
             unsigned char px = img.data[i * img.size.x + j];
-            s.buffer[pos.x + j + (pos.y + i) * 240] = img.palette[px];
+            int colour = img.palette[px];
+            if (colour != 0b0000100000100001) s.buffer[pos.x + j + (pos.y + i) * 240] = colour;
         }
     }
 }
