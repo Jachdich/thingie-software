@@ -381,6 +381,9 @@ static void handle_reset(struct ScrollerState *s) {
     s->scroll_timer = 0.0f;
     s->scroll_speed = 0.8f;
 
+    s->last_time_ms = to_ms_since_boot(get_absolute_time());;
+    s->time_accum = 0.0f;
+
     snprintf(score_buf, sizeof(score_buf), "Score: %d", s->score);
     snprintf(high_buf, sizeof(high_buf), "H.Score: %d", s->highscore);
     snprintf(time_buf, sizeof(time_buf), "Time: %d", s->seconds_alive);
@@ -434,9 +437,6 @@ void Scroller_init(struct ScrollerState *s) {
 
     s->highscore = 0;
 	handle_reset(s);
-
-    s->last_time_ms = to_ms_since_boot(get_absolute_time());;
-    s->time_accum = 0.0f;
 
     font = mf_find_font("DejaVuSans12");
 }
