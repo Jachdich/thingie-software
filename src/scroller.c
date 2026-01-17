@@ -23,6 +23,7 @@
 #define COL_RED     0b0111000000000000
 #define COL_WHITE   0b1111111111011111
 #define COL_BLACK   0b0000000000000000
+#define COL_NONE    0b0000100000100001
 
 static const struct mf_font_s *font;
 char score_buf[32];
@@ -55,7 +56,7 @@ static uint8_t player_pixels[PLAYER_W * PLAYER_H] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
 
-static uint16_t player_palette[] = {COL_BG,
+static uint16_t player_palette[] = {COL_NONE,
     0b1111110000000000,  // outline
     0b0000011111100000,  // body
     0,0,0,0,0, COL_WHITE, COL_BLACK
@@ -93,7 +94,7 @@ static uint8_t platform_pixels[TILE_SIZE * TILE_SIZE] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
 
-static uint16_t platform_palette[] = {COL_BG,
+static uint16_t platform_palette[] = {COL_NONE,
     0b1001001111001100,  // body
     0b0111101100001001,  // edge
     0,0,0,0,COL_WHITE, COL_BLACK
@@ -129,7 +130,7 @@ static uint8_t ground_pixels[TILE_SIZE * TILE_SIZE] = {
     9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
 };
 
-static uint16_t ground_palette[] = {COL_BG,
+static uint16_t ground_palette[] = {COL_NONE,
     0b1011110000101010, // dirt body
     0b1000001010100101, // dirt edge
     0b0100010000100101, // grass body
@@ -167,7 +168,7 @@ static uint8_t block_pixels[TILE_SIZE * TILE_SIZE] = {
     9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
 };
 
-static uint16_t block_palette[] = {COL_BG,
+static uint16_t block_palette[] = {COL_NONE,
     0b1001001111001100,  // body
     0b0111101100001001,  // edge
     0,0,0,0,COL_WHITE, COL_BLACK
@@ -179,7 +180,7 @@ static PaletteImage TILE_BLOCK_IMG = {
     .palette = block_palette
 };
 
-static uint16_t bg_block_palette[] = {COL_BG,
+static uint16_t bg_block_palette[] = {COL_NONE,
     0b0100000111000101,  // body
     0b0101001000000110,  // edge
     0,0,0,0,COL_WHITE, COL_BLACK
@@ -215,7 +216,7 @@ static uint8_t coin_pixels[TILE_SIZE * TILE_SIZE] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
 
-static uint16_t coin_palette[] = {COL_BG,
+static uint16_t coin_palette[] = {COL_NONE,
     0b1111011101000000,  // body
     0b1111111001100101,  // dark
     COL_WHITE,  // light
@@ -480,7 +481,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     s->time_accum += dt;
 
     /* -------- SCROLL -------- */
-    scroll_px += dt * s->scroll_speed*TILE_SIZE;
+    scroll_px += dt * s->scroll_speed * TILE_SIZE;
 
     while (scroll_px >= TILE_SIZE) {
         scroll_px -= TILE_SIZE;
