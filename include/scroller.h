@@ -50,6 +50,7 @@ struct ScrollerState {
     int highscore;
     int seconds_alive;
     int last_time_ms;
+    int time_accum;
 
     float scroll_timer;
     float scroll_speed; // tiles per second

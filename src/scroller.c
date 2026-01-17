@@ -25,8 +25,9 @@
 #define COL_BLACK   0b0000000000000000
 
 static const struct mf_font_s *font;
-char score_buf[64];
-char high_buf[64];
+char score_buf[32];
+char high_buf[32];
+char time_buf[32];
 
 /* ================== PLAYER ================== */
 
@@ -255,8 +256,8 @@ static const uint16_t sections[][MAP_H][MAP_W] = {
         {0,0,0,0,0,0,0,5,0,5,0,0,0},
         {0,0,0,0,0,0,0,0,0,0,0,0,0},
         {0,0,0,5,0,0,3,2,2,2,3,0,0},
-        {0,0,0,0,0,0,3,0,0,0,3,0,0},
-        {0,0,0,2,0,0,4,0,2,0,4,0,0},
+        {0,0,0,0,0,0,3,0,5,0,3,0,0},
+        {0,0,0,2,0,0,3,0,2,0,3,0,0},
         {0,0,0,0,0,0,4,0,0,0,4,0,0},
         {0,0,0,0,0,0,4,0,0,0,4,0,0},
         {1,1,3,2,2,2,3,2,2,2,3,1,1},
@@ -349,7 +350,8 @@ static void set_tile(struct ScrollerState *s, int px, int py, enum Tile t) {
 
 static void handle_death(struct ScrollerState *s) {
     snprintf(score_buf, sizeof(score_buf), "Score: %d", s->score);
-    snprintf(high_buf, sizeof(high_buf), "Highscore: %d", s->highscore);
+    snprintf(high_buf, sizeof(high_buf), "H.Score: %d", s->highscore);
+    snprintf(time_buf, sizeof(time_buf), "Time: %d", s->seconds_alive);
 	if (s->score == 0) {
 	    s->view = SCROLLER_VIEW_GAME_OVER;
 	} else if (s->score > s->highscore) {
@@ -379,7 +381,8 @@ static void handle_reset(struct ScrollerState *s) {
     s->scroll_speed = 0.8f;
 
     snprintf(score_buf, sizeof(score_buf), "Score: %d", s->score);
-    snprintf(high_buf, sizeof(high_buf), "Highscore: %d", s->highscore);
+    snprintf(high_buf, sizeof(high_buf), "H.Score: %d", s->highscore);
+    snprintf(time_buf, sizeof(time_buf), "Time: %d", s->seconds_alive);
 }
 
 /* ================= Collision Helpers ================= */
@@ -431,7 +434,8 @@ void Scroller_init(struct ScrollerState *s) {
     s->highscore = 0;
 	handle_reset(s);
 
-    s->last_time_ms = to_ms_since_boot(get_absolute_time());
+    s->last_time_ms = to_ms_since_boot(get_absolute_time());;
+    s->time_accum = 0.0f;
 
     font = mf_find_font("DejaVuSans12");
 }
@@ -473,6 +477,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
 
     float dt = (now - frame_start) / 1000.0f;
     frame_start = now;
+    s->time_accum += dt;
 
     /* -------- SCROLL -------- */
     scroll_px += dt * s->scroll_speed*TILE_SIZE;
@@ -480,13 +485,19 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     while (scroll_px >= TILE_SIZE) {
         scroll_px -= TILE_SIZE;
         shift_map_left(s);
+    }
 
+    while (s->time_accum >= 1.0f) {
+        s->time_accum -= 1.0f;
         s->seconds_alive++;
-        s->score += 10;
+        s->score += 5;
 
         if (s->seconds_alive % 60 == 0)
-            s->scroll_speed += 0.1f;
+            s->score += 50;
 
+        s->scroll_speed += 0.01f;
+
+        snprintf(time_buf, sizeof(time_buf), "Time: %d", s->seconds_alive);
         snprintf(score_buf, sizeof(score_buf), "Score: %d", s->score);
     }
 
@@ -552,7 +563,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     // Ceiling collision (jumping into blocks)
     enum Tile t1 = get_tile(s, next.x + 2, next.y);
     enum Tile t2 = get_tile(s, next.x + PLAYER_W - 2, next.y);
-    if ((solid_full(t1) || solid_full(t2)) && s->player.vel.y < 0) {
+    if (((solid_full(t1) || solid_full(t2)) && s->player.vel.y < 0) || next.y < INFO_H + 1) {
         next.y = ((next.y) / TILE_SIZE + 1) * TILE_SIZE;
         s->player.vel.y = 0;
     }
@@ -589,14 +600,18 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     }
 
 	draw_yline(screen, vec2(0, INFO_H), SCREEN_H - INFO_H, COL_RED);
+	draw_yline(screen, vec2(0, 0), INFO_H, COL_WHITE);
+	draw_yline(screen, vec2(SCREEN_W - 1, 0), INFO_H, COL_WHITE);
     draw_xline(screen, vec2(0, INFO_H), SCREEN_W, COL_WHITE);
+    draw_xline(screen, vec2(0, 0), SCREEN_W, COL_WHITE);
 
     draw_palette(
         screen, PLAYER_IMG,
         s->player.pos
     );
-    draw_string(screen, score_buf, vec2(6,4), COL_WHITE, font, MF_ALIGN_LEFT);
-    draw_string(screen, high_buf, vec2(-6,4), COL_WHITE, font, MF_ALIGN_RIGHT);
+    draw_string(screen, score_buf, vec2(2,3), COL_WHITE, font, MF_ALIGN_LEFT);
+    draw_string(screen, high_buf, vec2(-2,3), COL_WHITE, font, MF_ALIGN_RIGHT);
+    draw_string(screen, time_buf, vec2(SCREEN_W / 2,3), COL_WHITE, font, MF_ALIGN_CENTER);
 
     long frame_end = to_ms_since_boot(get_absolute_time());
     long frame_time = frame_end - now;
