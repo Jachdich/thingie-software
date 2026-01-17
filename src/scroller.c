@@ -392,9 +392,7 @@ static void handle_death(struct ScrollerState *s) {
     snprintf(score_buf, sizeof(score_buf), "Score: %d", s->score);
     snprintf(high_buf, sizeof(high_buf), "H.Score: %d", s->highscore);
     snprintf(time_buf, sizeof(time_buf), "Time: %d", s->seconds_alive);
-	if (s->score == 0) {
-	    s->view = SCROLLER_VIEW_GAME_OVER;
-	} else if (s->score > s->highscore) {
+	if (s->score > s->highscore) {
 		s->highscore = s->score;
 		s->view = SCROLLER_VIEW_NEW_SCORE;
 	} else {
@@ -493,12 +491,16 @@ bool Scroller_endgame(struct ScrollerState *s, Screen screen, const char *messag
         if (s->selected > 1) s->selected = 0;
     }
     keypad_next_frame();
-    draw_string(screen, message, vec2(120, 50), COL_WHITE, font, MF_ALIGN_CENTER);
-    draw_string(screen, score_buf, vec2(120, 62), COL_WHITE, font, MF_ALIGN_CENTER);
-    draw_string(screen, high_buf, vec2(120, 74), COL_WHITE, font, MF_ALIGN_CENTER);
-    draw_string(screen, "Again?", vec2(80, 100), COL_WHITE, font, MF_ALIGN_LEFT);
-    draw_string(screen, "Quit", vec2(80, 114), COL_WHITE, font, MF_ALIGN_LEFT);
-    draw_string(screen, ">", vec2(70, 100 + 14 * s->selected), COL_WHITE, font, MF_ALIGN_LEFT);
+    draw_rect(screen, vec2(0, 0), vec2(SCREEN_W, SCREEN_H), 0b0011000010100010);
+    draw_string(screen, message, vec2(120, 25), COL_WHITE, font, MF_ALIGN_CENTER);
+    draw_string(screen, high_buf, vec2(120, 60), COL_WHITE, font, MF_ALIGN_CENTER);
+    draw_string(screen, score_buf, vec2(120, 74), COL_WHITE, font, MF_ALIGN_CENTER);
+    draw_string(screen, time_buf, vec2(120, 110), COL_WHITE, font, MF_ALIGN_CENTER);
+    draw_string(screen, "Again", vec2(120, 140), COL_WHITE, font, MF_ALIGN_CENTER);
+    draw_string(screen, "Quit", vec2(120, 156), COL_WHITE, font, MF_ALIGN_CENTER);
+    draw_string(screen, "[", vec2(100 + 5 * s->selected, 140 + 16 * s->selected), COL_WHITE, font, MF_ALIGN_CENTER);
+    draw_string(screen, "]", vec2(140 - 4 * s->selected, 140 + 16 * s->selected), COL_WHITE, font, MF_ALIGN_CENTER);
+
     if (s->selected == 0 && go) {
         handle_reset(s);
         s->view = SCROLLER_VIEW_PLAYING;
