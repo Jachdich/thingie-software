@@ -15,11 +15,12 @@
 #define INFO_H 20
 
 #define MAP_W 13
-#define MAP_H 10
+#define MAP_H 11
 
 enum Tile {
     TILE_EMPTY = 0,
     TILE_GROUND,
+    TILE_DIRT,
     TILE_PLATFORM,
     TILE_BLOCK,
     TILE_BG_BLOCK,
