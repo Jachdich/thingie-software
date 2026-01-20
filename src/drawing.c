@@ -106,6 +106,9 @@ void draw_line(Screen s, Vec2 a, Vec2 b, uint16_t colour) {
 Vec2 vec2(int x, int y) {
     return (Vec2){x, y};
 }
+Vec3 vec3(int x, int y, int z) {
+    return (Vec3){x, y, z};
+}
 
 void draw_rect(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
     for (int y = pos.y; y < pos.y + size.y; y++) {
@@ -160,4 +163,10 @@ Vec2 vec2_add(Vec2 a, Vec2 b) {
 }
 bool vec2_eq(Vec2 a, Vec2 b) {
     return a.x == b.x && a.y == b.y;
+}
+Vec3 vec3_add(Vec3 a, Vec3 b) {
+    return vec3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+bool vec3_eq(Vec3 a, Vec3 b) {
+    return a.x == b.x && a.y == b.y && a.z == b.z;
 }

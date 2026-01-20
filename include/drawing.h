@@ -15,6 +15,10 @@ typedef struct {
 } Vec2;
 
 typedef struct {
+    int x, y, z;
+} Vec3;
+
+typedef struct {
     uint8_t *data;
     Vec2 size;
     uint16_t *palette;
@@ -27,6 +31,7 @@ typedef struct {
 
 
 Vec2 vec2(int x, int y);
+Vec3 vec3(int x, int y, int z);
 void draw_xline(Screen s, Vec2 pos, int len, uint16_t col);
 void draw_yline(Screen s, Vec2 pos, int len, uint16_t col);
 void draw_line(Screen s, Vec2 a, Vec2 b, uint16_t col);
@@ -37,4 +42,6 @@ void draw_string(Screen s, const char *str, Vec2 pos, uint16_t colour, const str
 void draw_string_multiline(Screen s, const char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font);
 Vec2 vec2_add(Vec2 a, Vec2 b);
 bool vec2_eq(Vec2 a, Vec2 b);
+Vec3 vec3_add(Vec3 a, Vec3 b);
+bool vec3_eq(Vec3 a, Vec3 b);
 #endif
