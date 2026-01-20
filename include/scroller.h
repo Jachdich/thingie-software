@@ -24,16 +24,22 @@ enum Tile {
     TILE_PLATFORM,
     TILE_BLOCK,
     TILE_BG_BLOCK,
-    TILE_COIN
+    TILE_BREAKABLE,
+    TILE_COIN,
+    TILE_HEART,
+    TILE_SPIKE
 };
 
 struct Player {
     Vec2 pos;
     Vec2 vel;
     bool on_ground;
+    int lives;
+	int invulnerable;
 };
 
 typedef enum {
+    SCROLLER_VIEW_PAUSED,
     SCROLLER_VIEW_GAME_OVER,
     SCROLLER_VIEW_NEW_SCORE,
     SCROLLER_VIEW_PLAYING,
