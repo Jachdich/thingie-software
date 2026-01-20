@@ -17,6 +17,8 @@
 #define MAP_W 13
 #define MAP_H 11
 
+#define MAX_STARS 35
+
 enum Tile {
     TILE_EMPTY = 0,
     TILE_GROUND,
@@ -28,6 +30,23 @@ enum Tile {
     TILE_COIN,
     TILE_HEART,
     TILE_SPIKE
+};
+
+typedef struct {
+    int16_t x, y;
+    uint8_t size;        // 0–2
+    uint8_t speed;       // base speed
+    uint8_t frac;        // 0–9 (tenths of a pixel)
+    uint8_t layer;       // parallax layer
+    bool off;
+} Star;
+
+
+enum SkyType {
+    SKY_CLASSIC,
+    SKY_NIGHT,
+    SKY_DAWN,
+    SKY_COUNT
 };
 
 struct Player {
@@ -50,6 +69,8 @@ struct ScrollerState {
 	int selected;
 	Scroller_View view;
 
+    enum SkyType sky;
+    Star stars[MAX_STARS];
     struct Player player;
     uint16_t map[MAP_H][MAP_W];
 

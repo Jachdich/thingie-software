@@ -474,7 +474,139 @@ static const uint16_t sections[][MAP_H][MAP_W] = {
 
 static int current_section;
 static int section_col;
-static float scroll_px;   // pixel-precise scroll offset
+static float scroll_px;
+
+/* =========== SKIES ========== */
+static inline bool needs_stars(enum SkyType sky) {
+    switch (sky) {
+        case SKY_NIGHT:
+            return true;
+        default:
+            return false;
+    }
+}
+
+static const uint16_t SKY_NIGHT_COLS[] = {
+    0b0000100010000101, // deep space blue
+    0b0001000100001010, // night sky blue
+    0b0010001000010000, // moonlight blue
+    0b0011001100011010, // early dawn blue
+    0b0100010000011100, // soft horizon glow
+    0b0110010100011010  // warm dawn haze
+};
+
+static const uint16_t SKY_DAWN_COLS[] = {
+    0b0010001000010000,
+    0b0011001100011010,
+    0b0100010000011100,
+    0b0110010100011010,
+};
+
+/* ============= DRAWING HELPERS ============= */
+static const uint8_t PARALLAX_SPEED[3] = {
+    2,    // far
+    4,    // mid
+    7    // near
+};
+
+static inline int brightness_565(uint16_t c) {
+    int r = (c >> 11) & 0x1F;
+    int g = (c >> 5)  & 0x3F;
+    int b =  c        & 0x1F;
+    return r * 2 + g * 3 + b * 2; // cheap weighted brightness
+}
+
+static void move_stars(struct ScrollerState *s, Screen screen) {
+    long now = to_ms_since_boot(get_absolute_time());
+    if (s->frame_start == 0)
+        s->frame_start = now;
+    float dt = (now - s->frame_start) / 1000.0f;
+    s->frame_start = now; // reset
+
+    float scroll_px = dt * s->scroll_speed * TILE_SIZE; // float, pixels per frame
+
+    for (int i = 0; i < MAX_STARS; i++) {
+        Star *star = &s->stars[i];
+
+        star->frac += star->speed;
+        if (star->frac >= 10) {
+            int dx = star->frac / 10;
+            star->frac %= 10;
+            star->x -= dx;
+        }
+
+        // recycle if fully off-screen
+        if (star->x + star->size < 0) {
+            star->x = SCREEN_W + star->size;
+            star->y = rand() % (SCREEN_H - INFO_H - TILE_SIZE) + INFO_H;
+
+            star->size = rand() % 5;
+            star->layer = star->size % 3;
+            star->speed = PARALLAX_SPEED[star->layer];
+            star->frac = rand() % 10;
+            star->off = false;
+            continue;
+        }
+    }
+}
+
+void draw_stars(struct ScrollerState *s, Screen screen) {
+    for (int i = 0; i < MAX_STARS; i++) {
+        Star *star = &s->stars[i];
+        int size = star->layer;
+
+        uint16_t sky = get_px(screen, vec2(star->x, star->y));
+        int b = brightness_565(sky);
+        if (b >= 120)
+            continue;
+        if (star->off)
+            continue;
+        uint16_t col;
+        if (b < 30)
+            col = COL_WHITE;
+        else if (b < 70)
+            col = COL_LIGHT_GRAY;
+        else
+            col = COL_GRAY;
+
+        if (size <= 0 || size > 3) {
+            draw_px(screen, vec2(star->x, star->y), col);
+        } else {
+            draw_yline(screen, vec2(star->x, star->y - size), size * 2 + 1, col);
+            draw_xline(screen, vec2(star->x - size, star->y), size * 2 + 1, col);
+        }
+    }
+}
+
+
+/* ============= DRAWING =========== */
+void draw_sky_night(Screen screen) {
+    Vec2 center = vec2(SCREEN_W / 2, SCREEN_H - INFO_H);
+    int radius = 170;
+    for (int i = 0; i < sizeof(SKY_NIGHT_COLS)/sizeof(*SKY_NIGHT_COLS); i++) {
+        draw_circle(screen, center, radius, SKY_NIGHT_COLS[i]);
+        radius -= 35;
+    }
+}
+
+void draw_sky_dawn(Screen s) {
+    Vec2 c = vec2(SCREEN_W / 2, INFO_H + 180);
+    int r = 300;
+    for (int i = 0; i < 4; i++, r -= 50)
+        draw_circle(s, c, r, SKY_DAWN_COLS[i]);
+}
+
+void draw_bg(struct ScrollerState *s, Screen screen) {
+    switch (s->sky) {
+        case SKY_CLASSIC:
+            draw_rect(screen, vec2(0, INFO_H), vec2(SCREEN_W, SCREEN_H - INFO_H), COL_BG);
+            return;
+        case SKY_NIGHT:  draw_sky_night(screen); draw_stars(s, screen); break;
+        case SKY_DAWN:   draw_sky_dawn(screen); break;
+        default:
+            return;
+    }
+}
 
 /* ================= HELPERS ================= */
 static enum Tile get_tile(struct ScrollerState *s, int px, int py) {
@@ -529,6 +661,24 @@ static void handle_reset(struct ScrollerState *s) {
     for (int y = 0; y < MAP_H; y++)
         for (int x = 0; x < MAP_W; x++)
             s->map[y][x] = sections[current_section][y][x];
+
+    // s->sky = SKY_NIGHT;
+    s->sky = rand() % SKY_COUNT;
+
+    if (needs_stars(s->sky)) {
+        for (int i = 0; i < MAX_STARS; i++) {
+            Star *star = &s->stars[i];
+
+            star->x = rand() % SCREEN_W;
+            star->y = rand() % (SCREEN_H - INFO_H - TILE_SIZE) + INFO_H;
+
+            star->size = rand() % 5;               // farther = smaller
+            star->layer = star->size % 3;
+            star->speed = PARALLAX_SPEED[star->layer];
+            star->frac = rand() % 10;
+            star->off = false;
+        }
+    }
 
 	s->score = 0;
     s->seconds_alive = 0;
@@ -817,7 +967,8 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
 		handle_death(s);
 
     /* -------- DRAW -------- */
-    draw_rect(screen, vec2(0, INFO_H), vec2(SCREEN_W, SCREEN_H - INFO_H), COL_BG);
+    if (needs_stars(s->sky)) move_stars(s, screen);
+    draw_bg(s, screen);
 
     for (int y = 0; y < MAP_H; y++) {
         for (int x = 0; x < MAP_W; x++) {
