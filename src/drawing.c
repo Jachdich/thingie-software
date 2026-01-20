@@ -2,6 +2,7 @@
 #include "../lib/mcufont/mcufont.h"
 #include "../include/drawing.h"
 #include <string.h>
+#include <math.h>
 #include <stdlib.h>
 
 typedef struct {
@@ -10,6 +11,10 @@ typedef struct {
     const struct mf_font_s *font;
     uint16_t x, y;
 } FontData;
+
+static bool invalid_pixel(int16_t i) {
+    return (i < 0 || i >= 240);
+}
 
 static void pixel_callback(int16_t x, int16_t y, uint8_t count, uint8_t alpha, void *state) {
     FontData *data = state;
@@ -66,14 +71,26 @@ void draw_string_multiline(Screen s, const char *str, Vec2 pos, uint16_t colour,
     mf_wordwrap(font, 240, str, &_multiline_string_callback, &state);
 }
 
+uint16_t get_px(Screen s, Vec2 pos) {
+    return s.buffer[pos.y * 240 + pos.x];
+}
+
+void draw_px(Screen s, Vec2 pos, uint16_t col) {
+    s.buffer[pos.y * 240 + pos.x] = col;
+}
+
 void draw_xline(Screen s, Vec2 pos, int len, uint16_t col) {
+    if (invalid_pixel(pos.y)) return;
     for (int x = pos.x; x < pos.x + len; x++) {
+        if (invalid_pixel(x)) continue;
         s.buffer[pos.y * 240 + x] = col;
     }
 }
 
 void draw_yline(Screen s, Vec2 pos, int len, uint16_t row) {
+    if (invalid_pixel(pos.x)) return;
     for (int y = pos.y; y < pos.y + len; y++) {
+        if (invalid_pixel(y)) continue;
         s.buffer[y * 240 + pos.x] = row;
     }
 }
@@ -87,6 +104,7 @@ void draw_line(Screen s, Vec2 a, Vec2 b, uint16_t colour) {
     int e2;
 
     while (true) {
+        if (invalid_pixel(a.x) || invalid_pixel(a.y)) continue;
         s.buffer[a.y * 240 + a.x] = colour;
         if (a.x == b.x && a.y == b.y)
             break;
@@ -113,17 +131,45 @@ Vec3 vec3(int x, int y, int z) {
 void draw_rect(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
     for (int y = pos.y; y < pos.y + size.y; y++) {
         for (int x = pos.x; x < pos.x + size.x; x++) {
+            if (invalid_pixel(x) || invalid_pixel(y)) continue;
             s.buffer[y * 240 + x] = colour;
         }
     }
 }
 
+void draw_circle(Screen s, Vec2 pos, uint16_t radius, uint16_t colour) {
+    if (radius < 0) radius = -radius;
+    int r2 = radius * radius;
+
+    int y_min = pos.y - radius;
+    int y_max = pos.y + radius;
+
+    if (y_min < 0) y_min = 0;
+    if (y_max >= SCREEN_HEIGHT) y_max = SCREEN_HEIGHT - 1;
+
+    for (int y = y_min; y <= y_max; y++) {
+        int dy = y - pos.y;
+        int dx_max = (int)sqrtf(r2 - dy * dy);
+
+        int x1 = pos.x - dx_max;
+        int x2 = pos.x + dx_max;
+
+        if (x1 < 0) x1 = 0;
+        if (x2 >= SCREEN_WIDTH) x2 = SCREEN_WIDTH - 1;
+
+        uint16_t *row = &s.buffer[y * SCREEN_WIDTH];
+        for (int x = x1; x <= x2; x++) {
+            row[x] = colour;
+        }
+    }
+}
+
+
 void draw_mask(Screen s, MaskImage img, Vec2 pos, const uint16_t *colours) {
     for (int i = 0; i < img.size.y; i++) {
         for (int j = 0; j < img.size.x; j++) {
             uint8_t pix = img.data[i * img.size.x + j];
-            if (pos.x + j >= 240 || pos.y + i >= 240) continue;
-            if (pos.x + j < 0 || pos.y + i < 0) continue;
+            if (invalid_pixel(pos.x+j) || invalid_pixel(pos.y+i)) continue;
             if (pix != 0) {
                 s.buffer[pos.x + j + (pos.y + i) * 240] = colours[pix - 1];
             }
@@ -145,8 +191,7 @@ void draw_mask(Screen s, MaskImage img, Vec2 pos, const uint16_t *colours) {
 void draw_palette(Screen s, PaletteImage img, Vec2 pos) {
     for (int i = 0; i < img.size.y; i++) {
         for (int j = 0; j < img.size.x; j++) {
-            if (pos.x + j >= 240 || pos.y + i >= 240) continue;
-            if (pos.x + j < 0 || pos.y + i < 0) continue;
+            if (invalid_pixel(pos.x+j) || invalid_pixel(pos.y+i)) continue;
             //     printf("Out of range (coloured) %d %d %d %d\n", x, j, y, i);
             // }
             unsigned char px = img.data[i * img.size.x + j];
