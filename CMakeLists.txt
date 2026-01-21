@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.13...3.27)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # initialize the SDK based on PICO_SDK_PATH
 # note: this must happen before project()
 include(pico_sdk_import.cmake)
@@ -20,6 +21,7 @@ add_executable(main
     src/tetris.c
     src/sgtl5000.c
     src/i2s.c
+    src/as5600.c
 
     lib/mcufont/mf_bwfont.c
     lib/mcufont/mf_font.c

@@ -89,9 +89,9 @@ bool sgtl5000_setup(void) {
     return true;
 }
 
-void sgtl_mute_dac(bool muted) {
-    // 32
-}
+// void sgtl_mute_dac(bool muted) {
+//     // 32
+// }
 
 uint16_t calc_volume(float volume, uint16_t range) {
     uint16_t cvol = (uint16_t)((volume * (float)range) + .499);
@@ -115,7 +115,7 @@ void sgtl_dac_volume(float left, float right) {
     uint16_t right_channel = 0x00FC - calc_volume(right, 0x00C0);
     uint16_t left_channel  = 0x00FC - calc_volume(left,  0x00C0);
     uint16_t volume = (right_channel << 8) | (left_channel << 0);
-    sgtl5000_write(CHIP_DAC_VOL, /*volume*/0x3C3C);
+    sgtl5000_write(CHIP_DAC_VOL, volume);
 }
 // auto sgtl5000::headphone_select(uint16_t input) -> void {
 //     // Make sure the input is within the proper range.
@@ -133,15 +133,16 @@ static __attribute__((aligned(8))) pio_i2s i2s;
 const float f_s = 48000;
 
 #define BUFFER_SIZE (1152 * 7)
-volatile static int16_t *samples;
-volatile static uint32_t read_ptr;
-volatile static uint32_t write_ptr;
+volatile int16_t *samples;
+volatile uint32_t read_ptr;
+volatile uint32_t write_ptr;
 
 static void process_audio(
     const int32_t* input, 
     int32_t* output, 
     size_t num_frames) 
 {
+    (void)input;
     // Values being sent to the codec are 32 bit signed 
     // values but the samples are only 16 bits so they
     // need to be pushed to the left edge.
@@ -187,7 +188,7 @@ static void dma_i2s_in_handler()
 
 #define FPM_ARM
 #include "../lib/libmad/mad.h"
-#include "../include/mp3.h"
+#include "../include/mp32.h"
 #include "../include/drawing.h"
 // uint8_t mp3[100];
 // uint32_t mp3_len = 100;
@@ -223,21 +224,29 @@ void music_init(struct MusicState *state) {
 
 }
 
-void music_step(struct MusicState *state, Screen s) {
+int music_step(struct MusicState *state, Screen s) {
     float len_f = (write_ptr - read_ptr) % BUFFER_SIZE;
     int len = len_f / BUFFER_SIZE * 200;
     draw_rect(s, vec2(0, 110), vec2(len, 20), 0xffff);
+
     uint32_t num = (write_ptr - read_ptr) % BUFFER_SIZE;
+    int n = 0;
     while (num < BUFFER_SIZE - 1152 * 4) {
+        long time = to_us_since_boot(get_absolute_time());
         mad_frame_decode(&state->frame, &state->stream);
         mad_synth_frame(&state->synth, &state->frame);
         for (int i = 0; i < 1152; i++) {
-            samples[write_ptr++] = state->synth.pcm.samplesX[i][0];
-            samples[write_ptr++] = state->synth.pcm.samplesX[i][1];
+            state->samples[write_ptr++] = state->synth.pcm.samplesX[i][0];
+            state->samples[write_ptr++] = state->synth.pcm.samplesX[i][1];
             write_ptr %= BUFFER_SIZE;
         }
         num = (write_ptr - read_ptr) % BUFFER_SIZE;
+        long time2 = to_us_since_boot(get_absolute_time());
+        long dur = time2 - time;
+        printf("%lu\n", dur);
+        n += 1;
     }
+    printf("n%d\n", n);
     len_f = (write_ptr - read_ptr) % BUFFER_SIZE;
     len = len_f / BUFFER_SIZE * 200;
     draw_rect(s, vec2(0, 140), vec2(len, 20), 0xffff);
@@ -254,3 +263,4 @@ void music_step(struct MusicState *state, Screen s) {
 }
 
 #endif
+// 6ms
