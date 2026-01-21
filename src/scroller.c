@@ -615,16 +615,15 @@ void draw_sky_dawn(Screen s) {
 }
 
 void draw_sky_gradient(Screen s) {
-    uint16_t col1 = COL_WHITE;
-    uint16_t col2 = COL_BLACK;
-    draw_gradient(s, vec2(0, INFO_H), vec2(SCREEN_W, SCREEN_H - INFO_H), col1, col2, UP);
+    uint16_t col1 = SKY_NIGHT_COLS[1];
+    uint16_t col2 = COL_BG;
+    draw_gradient(s, vec2(0, INFO_H), vec2(SCREEN_W, SCREEN_H - INFO_H), col1, col2, UP_RIGHT);
 }
 
 void draw_bg(struct ScrollerState *s, Screen screen) {
     switch (s->sky) {
         case SKY_CLASSIC:
-            draw_rect(screen, vec2(0, INFO_H), vec2(SCREEN_W, SCREEN_H - INFO_H), COL_BG);
-            return;
+             draw_rect(screen, vec2(0, INFO_H), vec2(SCREEN_W, SCREEN_H - INFO_H), COL_BG); return;
         case SKY_NIGHT:       draw_sky_night(screen); draw_stars(s, screen); break;
         case SKY_MIDNIGHT:    draw_sky_midnight(screen); draw_stars(s, screen); break;
         case SKY_DAWN:        draw_sky_dawn(screen); break;
