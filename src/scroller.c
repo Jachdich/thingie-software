@@ -15,9 +15,8 @@
 #define TARGET_FPS 60
 #define FRAME_TIME_MS (1000 / TARGET_FPS)
 
-#define GRAVITY 1
-#define JUMP_VEL -11
-#define MOVE_SPEED 2
+#define GRAVITY 0.5
+#define JUMP_VEL -8
 
 #define COL_BG          0b0100101000101011
 #define COL_RED         0b0111000000000000
@@ -670,8 +669,8 @@ static void handle_death(struct ScrollerState *s) {
 }
 
 static void handle_reset(struct ScrollerState *s) {
-	s->player.pos = vec2(40, INFO_H + 100);
-    s->player.vel = vec2(0, 0);
+	s->player.pos = vec2f(40, INFO_H + 100);
+    s->player.vel = vec2f(0, 0);
     s->player.on_ground = false;
     s->player.lives = 1;
     s->player.invulnerable = 0;
@@ -709,6 +708,7 @@ static void handle_reset(struct ScrollerState *s) {
     s->seconds_alive = 0;
     s->scroll_timer = 0.0f;
     s->scroll_speed = 0.8f;
+    s->player.move_speed = 2.0f;
 
     reset_time(s);
 
@@ -860,6 +860,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
 
     /* -------- SCROLL -------- */
     scroll_px += dt * s->scroll_speed * TILE_SIZE;
+    s->player.pos.x -= dt * s->scroll_speed * TILE_SIZE;
 
     while (scroll_px >= TILE_SIZE) {
         scroll_px -= TILE_SIZE;
@@ -875,11 +876,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
             s->score += 50;
 
         s->scroll_speed += 0.03f;
-        /*
-        <james changes>
         s->player.move_speed += 0.03f;
-        </james changes>
-        */
 
         snprintf(time_buf, sizeof(time_buf), "Time: %d", s->seconds_alive);
         snprintf(score_buf, sizeof(score_buf), "Score: %d", s->score);
@@ -891,13 +888,14 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     bool invulnerable = s->player.invulnerable > 0;
 
     /* -------- INPUT -------- */
-    s->player.vel.x = 0;
     if (keypad_get(3,0).pressed) {
         reset_time(s);
         s->view = SCROLLER_VIEW_PAUSED;
     }
-    if (keypad_get(1,1).held) s->player.vel.x = -MOVE_SPEED;
-    if (keypad_get(3,1).held) s->player.vel.x = MOVE_SPEED;
+    s->player.vel.x *= 0.8;
+    if (keypad_get(1,1).held) s->player.vel.x = -s->player.move_speed;
+    if (keypad_get(3,1).held) s->player.vel.x = s->player.move_speed;
+    
     if (keypad_get(2,0).pressed && s->player.on_ground) {
         s->player.vel.y = JUMP_VEL;
         s->player.on_ground = false;
@@ -906,7 +904,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
 
     /* -------- PHYSICS -------- */
     s->player.vel.y += GRAVITY;
-    Vec2 next = s->player.pos;
+    Vec2f next = s->player.pos;
 
     /* --- X AXIS (side collisions) --- */
     next.x += s->player.vel.x;
@@ -917,12 +915,12 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     enum Tile s2b = get_tile(s, next.x, next.y + PLAYER_H - 1);
     if (s->player.vel.x >= 0) { // moving right
         if (solid_side(s1a) || solid_side(s1b)) {
-            next.x = ((next.x + PLAYER_W - 1 + (int)scroll_px) / TILE_SIZE) * TILE_SIZE - PLAYER_W - (int)scroll_px;
+            next.x = (((int)next.x + PLAYER_W - 1 + (int)scroll_px) / TILE_SIZE) * TILE_SIZE - PLAYER_W - (int)scroll_px;
             if ((s1a == TILE_SPIKE || s1b == TILE_SPIKE) && !invulnerable) damage(s, 1);
         }
     } else if (s->player.vel.x < 0) { // moving left
         if (solid_side(s2a) || solid_side(s2b)) {
-            next.x = ((next.x + (int)scroll_px) / TILE_SIZE + 1) * TILE_SIZE - (int)scroll_px;
+            next.x = (((int)next.x + (int)scroll_px) / TILE_SIZE + 1) * TILE_SIZE - (int)scroll_px;
             if ((s2a == TILE_SPIKE || s2b == TILE_SPIKE) && !invulnerable) damage(s, 1);
         }
     }
@@ -945,7 +943,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     // Collision when falling onto solid top (platform or ground)
     if ((solid_top(b1) || solid_top(b2)) && s->player.vel.y >= 0) {
         // Align bottom of player to top of tile
-        int tile_y = ((next.y + PLAYER_H) / TILE_SIZE) * TILE_SIZE;
+        int tile_y = ((int)(next.y + PLAYER_H) / TILE_SIZE) * TILE_SIZE;
         next.y = tile_y - PLAYER_H;
 
         s->player.vel.y = 0;
@@ -963,7 +961,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     enum Tile t1 = get_tile(s, next.x + 2, next.y);
     enum Tile t2 = get_tile(s, next.x + PLAYER_W - 2, next.y);
     if (((solid_full(t1) || solid_full(t2)) && s->player.vel.y < 0) || next.y < INFO_H + 1) {
-        next.y = ((next.y) / TILE_SIZE + 1) * TILE_SIZE;
+        next.y = (((int)next.y) / TILE_SIZE + 1) * TILE_SIZE;
         s->player.vel.y = 0;
         if ((t1 == TILE_SPIKE || t2 == TILE_SPIKE) && !invulnerable) {
             damage(s, 1);
@@ -1019,8 +1017,8 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     draw_xline(screen, vec2(0, INFO_H), SCREEN_W, COL_WHITE);
     draw_xline(screen, vec2(0, 0), SCREEN_W, COL_WHITE);
 
-    if (invulnerable && (s->player.invulnerable == 1 || s->time_accum < 0.1 || (0.6 < s->time_accum && s->time_accum < 0.7))) draw_palette(screen, PLAYER_IMG_ALT, s->player.pos);
-    else draw_palette(screen, PLAYER_IMG, s->player.pos);
+    if (invulnerable && (s->player.invulnerable == 1 || s->time_accum < 0.1 || (0.6 < s->time_accum && s->time_accum < 0.7))) draw_palette(screen, PLAYER_IMG_ALT, vec2f_to_vec2(s->player.pos));
+    else draw_palette(screen, PLAYER_IMG, vec2f_to_vec2(s->player.pos));
 
     for (int i = 0; i < s->player.lives; i++) {
         Vec2 pos = vec2(2 + 22 * i, INFO_H + 3);
@@ -1032,10 +1030,6 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
 
     long frame_end = to_ms_since_boot(get_absolute_time());
     long frame_time = frame_end - now;
-
-    // if (frame_time < FRAME_TIME_MS) {
-    //     sleep_ms(FRAME_TIME_MS - frame_time);
-    // }
 
     return true;
 }
