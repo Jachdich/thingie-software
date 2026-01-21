@@ -38,6 +38,7 @@ typedef struct {
     uint8_t speed;       // base speed
     uint8_t frac;        // 0–9 (tenths of a pixel)
     uint8_t layer;       // parallax layer
+    float flicker_timer;
     bool off;
 } Star;
 

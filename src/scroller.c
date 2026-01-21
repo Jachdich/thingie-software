@@ -544,9 +544,21 @@ static void move_stars(struct ScrollerState *s, Screen screen) {
             star->layer = star->size % 3;
             star->speed = PARALLAX_SPEED[star->layer];
             star->frac = rand() % 10;
+			star->flicker_timer = 0;
             star->off = false;
             continue;
         }
+
+        star->flicker_timer += dt;   // dt in milliseconds
+        if (!star->off && star->flicker_timer > 800 + rand() % 800) {
+            star->off = true;
+            star->flicker_timer = 0;
+        }
+        else if (star->off && star->flicker_timer > 100 + rand() % 200) {
+            star->off = false;
+            star->flicker_timer = 0;
+        }
+
     }
 }
 
@@ -676,6 +688,7 @@ static void handle_reset(struct ScrollerState *s) {
             star->layer = star->size % 3;
             star->speed = PARALLAX_SPEED[star->layer];
             star->frac = rand() % 10;
+            star->flicker_timer = 0;
             star->off = false;
         }
     }
