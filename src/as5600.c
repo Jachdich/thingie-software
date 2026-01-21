@@ -1,3 +1,4 @@
+#ifndef TESTING
 #include <stdint.h>
 #include <stdbool.h>
 #include "hardware/i2c.h"
@@ -19,3 +20,4 @@ uint16_t as5600_read_adc() {
     i2c_read_blocking(i2c_default, AS5600_ADDR, ret, 2, false);
     return ret[0] << 8 | ret[1];
 }
+#endif

@@ -2,6 +2,7 @@
 #include "../include/_time_internal.h"
 #include "../../include/drawing.h"
 int main_(void);
+void init(void);
 
 int music_step(void *a, Screen s) {
     return 0;

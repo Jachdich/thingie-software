@@ -3,6 +3,7 @@
 #include "../include/drawing.h"
 #include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define X_BLOCKS 10
 #define Y_BLOCKS 20

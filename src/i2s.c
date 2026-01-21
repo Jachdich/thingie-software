@@ -6,10 +6,11 @@
 #include "i2s.pio.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "../include/i2s.h"
     
 static float pio_div(float desired_freq, uint16_t *div, uint8_t *frac) {
-    float clk = (float)clock_get_hz(clk_sys);
+    float clk = clock_get_hz(clk_sys);
     float desired_ratio = clk/desired_freq;
     float d;
     float f = modff(desired_ratio, &d);

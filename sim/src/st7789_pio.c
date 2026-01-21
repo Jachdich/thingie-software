@@ -33,6 +33,8 @@ void update_keystate(SDL_Keycode code, int state) {
     }
 }
 
+uint16_t wheel = 0;
+
 void *draw_thread(void* a) {
     SDL_Event ev;
     while (1) {	
@@ -48,6 +50,9 @@ void *draw_thread(void* a) {
                     break;
                 case SDL_KEYUP:
                     update_keystate(ev.key.keysym.sym, 1); 
+                    break;
+                case SDL_MOUSEWHEEL:
+                    wheel += ev.wheel.y * 64;
                     break;
     		}
     	}
@@ -133,3 +138,11 @@ void st7789_lcd_put(PIO a, uint b, uint8_t n) {
     }
 }
 
+
+uint16_t as5600_read_raw_angle() {
+    return wheel;
+}
+
+uint16_t as5600_read_adc() {
+    return 16384;
+}

@@ -8,6 +8,7 @@
 #include "pico/binary_info.h"
 #include "../include/i2s.h"
 #include "../include/sgtl5000.h"
+#include "../include/wheel.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -193,7 +194,6 @@ static void dma_i2s_in_handler()
 // uint8_t mp3[100];
 // uint32_t mp3_len = 100;
 
-extern int16_t wheel_delta;
 
 struct MusicState {
     struct mad_stream stream;
@@ -252,7 +252,7 @@ int music_step(struct MusicState *state, Screen s) {
     draw_rect(s, vec2(0, 140), vec2(len, 20), 0xffff);
     draw_yline(s, vec2(200, 0), 240, 0xffff);
 
-    float delta = wheel_delta / 4096.0;
+    float delta = get_wheel_delta() / 4096.0;
     state->volume += delta;
     if (state->volume < 0.0) state->volume = 0.0;
     if (state->volume > 1.0) state->volume = 1.0;

@@ -28,6 +28,7 @@ void keypad_init() {
 }
 
 bool irq_update_keypad(repeating_timer_t *_) {
+    (void)_;
     keypad_read(keypad, keypad_last_frame);
     return true;
 }

@@ -22,6 +22,8 @@ add_executable(main
     src/sgtl5000.c
     src/i2s.c
     src/as5600.c
+    src/scroller.c
+    src/wheel.c
 
     lib/mcufont/mf_bwfont.c
     lib/mcufont/mf_font.c
@@ -43,8 +45,6 @@ add_executable(main
     lib/libmad/synth.c
     lib/libmad/timer.c
     lib/libmad/version.c
-        src/scroller.c
-        include/scroller.h
 )
 
 # Add pico_stdlib library which aggregates commonly used features

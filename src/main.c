@@ -1,6 +1,7 @@
 #include "../lib/st7789/st7789_pio.h"
 #include "../include/drawing.h"
 #include "../include/as5600.h"
+#include "../include/wheel.h"
 #include "../include/tetris.h"
 #include "../include/keypad.h"
 #include "../include/snake.h"
@@ -47,6 +48,7 @@ void st7789_lcd_put(PIO a, uint b, uint8_t n);
 //     float volume;
 //     int16_t samples[BUFFER_SIZE];
 // };
+void st7789_start_pixels(PIO, uint);
 
 
 void core1_entry() {
@@ -59,6 +61,7 @@ void core1_entry() {
     // struct MusicState *state = (struct MusicState*)game_arena;
     while (1) {
         uint32_t _ = multicore_fifo_pop_blocking();
+        (void)_;
 
         st7789_start_pixels(st.pio, st.sm);
         for (int i = 0; i < 240 * 240; i++) {
@@ -117,22 +120,6 @@ void menu_state_init(MenuState *ms) {
 }
 
 float brightness = 32.0;
-uint16_t wheel_tare = 0;
-uint16_t last_wheel;
-int16_t wheel_delta;
-int16_t get_wheel_delta() {
-    uint16_t wheel = as5600_read_raw_angle();
-    // ((n % M) + M) % M : https://stackoverflow.com/a/1907585
-    int16_t delta = ((wheel - last_wheel) % 4096 + 4096) % 4096;
-    // we assume the delta is the small way around the circle.
-    // if the value wraps, then delta might be very large and it's more appropriate
-    // to put it in the range (-2048, 2048)
-    if (delta > 2048) {
-        delta -= 4096;
-    }
-    last_wheel = wheel;
-    return delta;
-}
 
 bool on = false;
 void set_on(int);
@@ -169,7 +156,6 @@ void draw_menu(Screen s, void *game_state, MenuState *ms) {
                 break;
             }
             case MAINVIEW_BRIGHTNESS:
-                // wheel_tare = as5600_read_raw_angle();
                 break;
             default: break;
         }
@@ -178,7 +164,7 @@ void draw_menu(Screen s, void *game_state, MenuState *ms) {
     sprintf(bri, "Brightness: %.01f%%", brightness / 64.0 * 100.0);
     
     if (states[ms->selected_item] == MAINVIEW_BRIGHTNESS) {
-        brightness += wheel_delta / 4096.0 * 32.0;
+        brightness += get_wheel_delta() / 4096.0 * 32.0;
         if (brightness > 64.0) brightness = 64.0;
         if (brightness < 0.0) brightness = 0.0;
     }
@@ -356,8 +342,6 @@ int main() {
         memset(back_buffer, 0x00, 240*240*2);
         long time1 = to_us_since_boot(get_absolute_time());
         Screen s = (Screen) {back_buffer};
-        wheel_delta = get_wheel_delta();
-
         #ifdef KB_TEST
         
         for (int x = 0; x < 4; x++) {
@@ -419,6 +403,8 @@ int main() {
             draw_string(s, debug_string, vec2(0, 232), 0xffff,
                         mf_font_fixed_5x8, MF_ALIGN_LEFT);
         }
+
+        wheel_next_frame();
 
         // update brightness
         pwm_set_gpio_level(PIN_BL, (uint16_t)(brightness * brightness));

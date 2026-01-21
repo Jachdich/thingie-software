@@ -163,7 +163,6 @@ void draw_rect(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
 }
 
 void draw_circle(Screen s, Vec2 pos, uint16_t radius, uint16_t colour) {
-    if (radius < 0) radius = -radius;
     int r2 = radius * radius;
 
     int y_min = pos.y - radius;
@@ -174,7 +173,7 @@ void draw_circle(Screen s, Vec2 pos, uint16_t radius, uint16_t colour) {
 
     for (int y = y_min; y <= y_max; y++) {
         int dy = y - pos.y;
-        int dx_max = (int)sqrtf(r2 - dy * dy);
+        int dx_max = sqrtf(r2 - dy * dy);
 
         int x1 = pos.x - dx_max;
         int x2 = pos.x + dx_max;
