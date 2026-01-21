@@ -480,6 +480,7 @@ static float scroll_px;
 static inline bool needs_stars(enum SkyType sky) {
     switch (sky) {
         case SKY_NIGHT:
+        case SKY_MIDNIGHT:
             return true;
         default:
             return false;
@@ -601,6 +602,11 @@ void draw_sky_night(Screen screen) {
     }
 }
 
+void draw_sky_midnight(Screen screen) {
+    Vec2 center = vec2(SCREEN_W / 2, SCREEN_H - INFO_H);
+    draw_circle(screen, center, 200, SKY_NIGHT_COLS[0]);
+}
+
 void draw_sky_dawn(Screen s) {
     Vec2 c = vec2(SCREEN_W / 2, INFO_H + 180);
     int r = 300;
@@ -608,13 +614,21 @@ void draw_sky_dawn(Screen s) {
         draw_circle(s, c, r, SKY_DAWN_COLS[i]);
 }
 
+void draw_sky_gradient(Screen s) {
+    uint16_t col1 = COL_WHITE;
+    uint16_t col2 = COL_BLACK;
+    draw_gradient(s, vec2(0, INFO_H), vec2(SCREEN_W, SCREEN_H - INFO_H), col1, col2, UP);
+}
+
 void draw_bg(struct ScrollerState *s, Screen screen) {
     switch (s->sky) {
         case SKY_CLASSIC:
             draw_rect(screen, vec2(0, INFO_H), vec2(SCREEN_W, SCREEN_H - INFO_H), COL_BG);
             return;
-        case SKY_NIGHT:  draw_sky_night(screen); draw_stars(s, screen); break;
-        case SKY_DAWN:   draw_sky_dawn(screen); break;
+        case SKY_NIGHT:       draw_sky_night(screen); draw_stars(s, screen); break;
+        case SKY_MIDNIGHT:    draw_sky_midnight(screen); draw_stars(s, screen); break;
+        case SKY_DAWN:        draw_sky_dawn(screen); break;
+        case SKY_GRADIENT:    draw_sky_gradient(screen); break;
         default:
             return;
     }
@@ -674,8 +688,8 @@ static void handle_reset(struct ScrollerState *s) {
         for (int x = 0; x < MAP_W; x++)
             s->map[y][x] = sections[current_section][y][x];
 
-    // s->sky = SKY_NIGHT;
     s->sky = rand() % SKY_COUNT;
+    // s->sky = SKY_GRADIENT;
 
     if (needs_stars(s->sky)) {
         for (int i = 0; i < MAX_STARS; i++) {

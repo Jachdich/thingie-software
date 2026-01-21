@@ -46,7 +46,9 @@ typedef struct {
 enum SkyType {
     SKY_CLASSIC,
     SKY_NIGHT,
+    SKY_MIDNIGHT,
     SKY_DAWN,
+	SKY_GRADIENT,
     SKY_COUNT
 };
 
