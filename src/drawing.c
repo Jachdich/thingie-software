@@ -16,6 +16,31 @@ static bool invalid_pixel(int16_t i) {
     return (i < 0 || i >= 240);
 }
 
+static inline int clampi(int v, int lo, int hi) {
+    return v < lo ? lo : (v > hi ? hi : v);
+}
+
+
+static inline uint8_t lerp8(uint8_t a, uint8_t b, uint16_t t, uint16_t max) {
+    return a + ((b - a) * t) / max;
+}
+
+static inline uint16_t lerp565(uint16_t c1, uint16_t c2, int t, int max) {
+    int r1 = (c1 >> 11) & 31, g1 = (c1 >> 5) & 63, b1 = c1 & 31;
+    int r2 = (c2 >> 11) & 31, g2 = (c2 >> 5) & 63, b2 = c2 & 31;
+
+    int r = r1 + (r2 - r1) * t / max;
+    int g = g1 + (g2 - g1) * t / max;
+    int b = b1 + (b2 - b1) * t / max;
+
+    return (r << 11) | (g << 5) | b;
+}
+
+
+static inline uint16_t pack565(uint8_t r, uint8_t g, uint8_t b) {
+    return (r << 11) | (g << 5) | b;
+}
+
 static void pixel_callback(int16_t x, int16_t y, uint8_t count, uint8_t alpha, void *state) {
     FontData *data = state;
     uint8_t r = ((data->colour >> 11) & 0b11111) * alpha / 255; // TODO a >> 8 may be acceptable here
@@ -197,6 +222,58 @@ void draw_palette(Screen s, PaletteImage img, Vec2 pos) {
             unsigned char px = img.data[i * img.size.x + j];
             int colour = img.palette[px];
             if (colour != 0b0000100000100001) s.buffer[pos.x + j + (pos.y + i) * 240] = colour;
+        }
+    }
+}
+
+static const uint8_t dither4x4[4][4] = {
+    { 0,  8,  2, 10 },
+    {12,  4, 14,  6 },
+    { 3, 11,  1,  9 },
+    {15,  7, 13,  5 }
+};
+
+
+void draw_gradient(
+    Screen s,
+    Vec2 pos,
+    Vec2 size,
+    uint16_t col1,
+    uint16_t col2,
+    Direction dir
+) {
+    int w = size.x;
+    int h = size.y;
+    int max = w + h;
+
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+
+            int t;
+            switch (dir) {
+            case UP:         t = h - y; break;
+            case DOWN:       t = y; break;
+            case LEFT:       t = w - x; break;
+            case RIGHT:      t = x; break;
+            case UP_LEFT:    t = (w - x) + (h - y); break;
+            case UP_RIGHT:   t = x + (h - y); break;
+            case DOWN_LEFT:  t = (w - x) + y; break;
+            case DOWN_RIGHT: t = x + y; break;
+            default: t = 0;
+            }
+
+            // smooth interpolation
+            uint16_t base = lerp565(col1, col2, t, max);
+
+            // subtle ordered dither (565 precision)
+            int d = dither4x4[y & 3][x & 3];
+            if (d > 8 && base != col2)
+                base++;
+
+            int px = pos.x + x;
+            int py = pos.y + y;
+            if (!invalid_pixel(px) && !invalid_pixel(py))
+                s.buffer[py * SCREEN_WIDTH + px] = base;
         }
     }
 }

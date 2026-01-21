@@ -29,6 +29,17 @@ typedef struct {
     Vec2 size;
 } MaskImage;
 
+typedef enum {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    UP_LEFT,
+    UP_RIGHT,
+    DOWN_LEFT,
+    DOWN_RIGHT
+} Direction;
+
 
 Vec2 vec2(int x, int y);
 Vec3 vec3(int x, int y, int z);
@@ -41,6 +52,7 @@ void draw_rect(Screen s, Vec2 pos, Vec2 size, uint16_t colour);
 void draw_circle(Screen s, Vec2 pos, uint16_t radius, uint16_t colour);
 void draw_mask(Screen s, MaskImage img, Vec2 pos, const uint16_t *colours);
 void draw_palette(Screen s, PaletteImage img, Vec2 pos);
+void draw_gradient(Screen s, Vec2 pos, Vec2 size, uint16_t col1, uint16_t col2, Direction direction);
 void draw_string(Screen s, const char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font, enum mf_align_t align);
 void draw_string_multiline(Screen s, const char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font);
 Vec2 vec2_add(Vec2 a, Vec2 b);
