@@ -680,9 +680,11 @@ static void handle_reset(struct ScrollerState *s) {
     section_col = 0;
     scroll_px = 0.0f;
 
-    for (int y = 0; y < MAP_H; y++)
-        for (int x = 0; x < MAP_W; x++)
+    for (int y = 0; y < MAP_H; y++) {
+        for (int x = 0; x < MAP_W; x++) {
             s->map[y][x] = sections[current_section][y][x];
+        }
+    }
 
     s->sky = rand() % SKY_COUNT;
     // s->sky = SKY_GRADIENT;
@@ -872,7 +874,12 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
         if (s->seconds_alive % 60 == 0)
             s->score += 50;
 
-        s->scroll_speed += 0.01f;
+        s->scroll_speed += 0.03f;
+        /*
+        <james changes>
+        s->player.move_speed += 0.03f;
+        </james changes>
+        */
 
         snprintf(time_buf, sizeof(time_buf), "Time: %d", s->seconds_alive);
         snprintf(score_buf, sizeof(score_buf), "Score: %d", s->score);
@@ -936,7 +943,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     enum Tile b2 = get_tile(s, next.x + PLAYER_W - 2, next.y + PLAYER_H);
 
     // Collision when falling onto solid top (platform or ground)
-    if ((solid_top(b1) || solid_top(b2)) && s->player.vel.y > 0) {
+    if ((solid_top(b1) || solid_top(b2)) && s->player.vel.y >= 0) {
         // Align bottom of player to top of tile
         int tile_y = ((next.y + PLAYER_H) / TILE_SIZE) * TILE_SIZE;
         next.y = tile_y - PLAYER_H;
@@ -1026,9 +1033,9 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     long frame_end = to_ms_since_boot(get_absolute_time());
     long frame_time = frame_end - now;
 
-    if (frame_time < FRAME_TIME_MS) {
-        sleep_ms(FRAME_TIME_MS - frame_time);
-    }
+    // if (frame_time < FRAME_TIME_MS) {
+    //     sleep_ms(FRAME_TIME_MS - frame_time);
+    // }
 
     return true;
 }

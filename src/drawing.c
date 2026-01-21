@@ -283,12 +283,31 @@ void draw_gradient(
 Vec2 vec2_add(Vec2 a, Vec2 b) {
     return vec2(a.x + b.x, a.y + b.y);
 }
+
 bool vec2_eq(Vec2 a, Vec2 b) {
     return a.x == b.x && a.y == b.y;
 }
+
 Vec3 vec3_add(Vec3 a, Vec3 b) {
     return vec3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
+
 bool vec3_eq(Vec3 a, Vec3 b) {
     return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
+Vec2f vec2f_add(Vec2f a, Vec2f b) {
+    return vec2f(a.x + b.x, a.y + b.y);
+}
+
+bool vec2f_eq(Vec2f a, Vec2f b) {
+    return a.x == b.x && a.y == b.y;
+}
+
+Vec2 vec2f_to_vec2(struct Vec2f v) {
+    return vec2((int)v.x, (int)v.y);
+}
+
+Vec2f vec2f(float x, float y) {
+    return (Vec2f){.x = x, .y = y};
 }
