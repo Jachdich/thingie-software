@@ -189,10 +189,10 @@ static void dma_i2s_in_handler()
 
 #define FPM_ARM
 #include "../lib/libmad/mad.h"
-#include "../include/mp32.h"
+// #include "../include/mp32.h"
 #include "../include/drawing.h"
-// uint8_t mp3[100];
-// uint32_t mp3_len = 100;
+uint8_t mp3[100];
+uint32_t mp3_len = 100;
 
 
 struct MusicState {

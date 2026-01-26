@@ -1,6 +1,8 @@
+SIM_LIBS := mcufont st7789
+
 SIM_SRC := $(shell find src -name "*.c")
 SW_SRC := $(shell find ../src -name "*.c")
-LIB_SRC := $(shell find ../lib -name "*.c")
+LIB_SRC := $(foreach dir,$(SIM_LIBS),$(shell find ../lib/$(dir) -name "*.c"))
 
 SIM_HEADERS := $(shell find include -name "*.h")
 SW_HEADERS := $(shell find ../include -name "*.h")
@@ -33,7 +35,7 @@ lib_obj/$(dir)/%.o: ../lib/$(dir)/%.c $(SIM_HEADERS) $(SW_HEADERS)
 	gcc -c -o $$@ $$< $(CFLAGS)
 endef
 
-$(foreach dir,$(shell find ../lib -maxdepth 1 -mindepth 1 -type d -printf "%f\n"),$(eval $(GEN_RULE)))
+$(foreach dir,$(SIM_LIBS),$(eval $(GEN_RULE)))
 
 .PHONY: clean
 clean:

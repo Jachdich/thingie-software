@@ -21,6 +21,57 @@
 #include <math.h>
 #include <stdlib.h>
 
+
+#include "f_util.h"
+#include "hw_config.h"
+#include "ff.h"
+
+// /* Configuration of hardware SPI object */
+// static spi_t spi = {
+//     .hw_inst = spi0,  // SPI component
+//     .sck_gpio = 18,    // GPIO number (not Pico pin number)
+//     .mosi_gpio = 19,
+//     .miso_gpio = 16,
+//     .baud_rate = 125 * 1000 * 1000 / 16  // 15625000 Hz
+//     //.baud_rate = 125 * 1000 * 1000 / 6  // 20833333 Hz
+//     // .baud_rate = 125 * 1000 * 1000 / 4  // 31250000 Hz
+//     //.baud_rate = 125 * 1000 * 1000 / 2  // 62500000 Hz
+// };
+
+// /* SPI Interface */
+// static sd_spi_if_t spi_if = {
+//     .spi = &spi,  // Pointer to the SPI driving this card
+//     .ss_gpio = 22  // The SPI slave select GPIO for this SD card
+// };
+
+// /* Configuration of the SD Card socket object */
+// static sd_card_t sd_card = {
+//     .type = SD_IF_SPI,
+//     .spi_if_p = &spi_if  // Pointer to the SPI interface driving this card
+// };
+
+// /* ********************************************************************** */
+
+// size_t sd_get_num() { return 1; }
+
+// /**
+//  * @brief Get a pointer to an SD card object by its number.
+//  *
+//  * @param[in] num The number of the SD card to get.
+//  *
+//  * @return A pointer to the SD card object, or @c NULL if the number is invalid.
+//  */
+// sd_card_t *sd_get_by_num(size_t num) {
+//     if (0 == num) {
+//         // The number 0 is a valid SD card number.
+//         // Return a pointer to the sd_card object.
+//         return &sd_card;
+//     } else {
+//         // The number is invalid. Return @c NULL.
+//         return NULL;
+//     }
+// }
+
 // #define KB_TEST
 #define PIN_BL 17
 int music_step(void *, Screen);
@@ -56,12 +107,62 @@ void core1_entry() {
     repeating_timer_t timer;
     alarm_pool_add_repeating_timer_ms(pool, 2, irq_update_keypad, NULL, &timer);
     
+    // struct MusicState *state = (struct MusicState*)game_arena;
+ 
+    // char buf[100];
+    // // See FatFs - Generic FAT Filesystem Module, "Application Interface",
+    // // http://elm-chan.org/fsw/ff/00index_e.html
+    // FATFS fs;
+    // FRESULT fr = f_mount(&fs, "", 1);
+    // if (FR_OK != fr) {
+    //     sprintf(buf, "f_mount error: %s (%d)\n", FRESULT_str(fr), fr);
+    //     goto end;
+    // }
+
+    // // Open a file and write to it
+    // FIL fil;
+    // const char* const filename = "filename.txt";
+    // fr = f_open(&fil, filename, FA_OPEN_APPEND | FA_WRITE);
+    // if (FR_OK != fr && FR_EXIST != fr) {
+    //     sprintf(buf, "f_open(%s) error: %s (%d)\n", filename, FRESULT_str(fr), fr);
+    //     goto end;
+    // } else {
+        
+    //     printf("open ok\n");
+    // }
+    // if (f_printf(&fil, "Hello, world!\n") < 0) {
+    //     sprintf(buf,"f_printf failed\n");
+    //     goto end;
+    // } else {
+    //     printf("write ok\n");
+    // }
+
+    // // Close the file
+    // fr = f_close(&fil);
+    // if (FR_OK != fr) {
+    //     sprintf(buf, "f_close error: %s (%d)\n", FRESULT_str(fr), fr);
+    //     goto end;
+    // } else {
+    //     printf("close ok\n");
+    // }
+
+    // // Unmount the SD card
+    // f_unmount("");
+    // printf("umount ok\n");
+    // sprintf(buf, "all ok!!");
+
+    // end:
+    // sleep_ms(500);
+
+
     uint16_t **buffer = &front_buffer;
     ST7789 st = st7789_init();
-    // struct MusicState *state = (struct MusicState*)game_arena;
     while (1) {
         uint32_t _ = multicore_fifo_pop_blocking();
         (void)_;
+
+        // Screen s = (Screen){ .buffer = *buffer, .size = vec2(240, 240)};
+        // draw_string(s, buf, vec2(0, 0), 0xffff, mf_find_font("fixed_5x8"), MF_ALIGN_LEFT);
 
         st7789_start_pixels(st.pio, st.sm);
         for (int i = 0; i < 240 * 240; i++) {
@@ -71,6 +172,7 @@ void core1_entry() {
         }
 
         
+
         // maybe limit the framerate
         // consider interrupts
     }
@@ -149,9 +251,6 @@ void draw_menu(Screen s, void *game_state, MenuState *ms) {
                 Scroller_init(game_state);
                 break;
             case MAINVIEW_MUSIC: {
-                // set_on(on = !on);
-                // ms->view = MAINVIEW_MENU;
-                // ms->view = MAINVIEW_MUSIC;
                 music_init(game_state);
                 break;
             }
@@ -341,7 +440,7 @@ int main() {
         long time = to_us_since_boot(get_absolute_time());
         memset(back_buffer, 0x00, 240*240*2);
         long time1 = to_us_since_boot(get_absolute_time());
-        Screen s = (Screen) {back_buffer};
+        Screen s = (Screen){ .buffer = back_buffer, .size = vec2(240, 240)};
         #ifdef KB_TEST
         
         for (int x = 0; x < 4; x++) {
@@ -419,7 +518,6 @@ int main() {
         long time3 = to_us_since_boot(get_absolute_time());
 
         if (debug_enabled) {
-            memset(debug_string, 0, 100);
             sprintf(debug_string, "c:%lu r:%lu f:%lu t:%lu %f %.01f%%",
                     time1 - time, time2 - time1, time3 - time2, time3 - time,
                     1000000.0 / (float)(time3 - time),

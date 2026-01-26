@@ -6,15 +6,11 @@
 #include <stdlib.h>
 
 typedef struct {
-    uint16_t *buffer;
+    Screen *s;
     uint16_t colour;
     const struct mf_font_s *font;
     uint16_t x, y;
 } FontData;
-
-static bool invalid_pixel(int16_t i) {
-    return (i < 0 || i >= 240);
-}
 
 static inline int clampi(int v, int lo, int hi) {
     return v < lo ? lo : (v > hi ? hi : v);
@@ -47,12 +43,12 @@ static void pixel_callback(int16_t x, int16_t y, uint8_t count, uint8_t alpha, v
     uint8_t g = ((data->colour >> 5) & 0b111111) * alpha / 255;
     uint8_t b = ((data->colour >> 0) & 0b11111) * alpha / 255;
     while (count--) {
-        uint16_t bg = data->buffer[y * 240 + x];
+        uint16_t bg = data->s->buffer[y * data->s->size.x + x];
         uint8_t bg_r = ((bg >> 11) & 0b11111) * (255 - alpha) / 255 + r;
         uint8_t bg_g = ((bg >> 5) & 0b111111) * (255 - alpha) / 255 + g;
         uint8_t bg_b = ((bg >> 0) & 0b11111) * (255 - alpha) / 255 + b;
 
-        data->buffer[y * 240 + x] = (bg_r << 11) | (bg_g << 5) | bg_b;
+        data->s->buffer[y * data->s->size.x + x] = (bg_r << 11) | (bg_g << 5) | bg_b;
         x++;
     }
 }
@@ -64,7 +60,7 @@ static uint8_t char_callback(int16_t x0, int16_t y0, mf_char character, void *st
 
 void draw_string(Screen s, const char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font, enum mf_align_t align) {
     FontData state = (FontData){
-        .buffer = s.buffer,
+        .s = &s,
         .colour = colour,
         .font = font,
     };
@@ -87,7 +83,7 @@ bool _multiline_string_callback(const char *str, uint16_t char_count,
 
 void draw_string_multiline(Screen s, const char *str, Vec2 pos, uint16_t colour, const struct mf_font_s *font) {
     FontData state = (FontData){
-        .buffer = s.buffer,
+        .s = &s,
         .colour = colour,
         .font = font,
         .x = pos.x,
@@ -97,26 +93,26 @@ void draw_string_multiline(Screen s, const char *str, Vec2 pos, uint16_t colour,
 }
 
 uint16_t get_px(Screen s, Vec2 pos) {
-    return s.buffer[pos.y * 240 + pos.x];
+    return s.buffer[pos.y * s.size.x + pos.x];
 }
 
 void draw_px(Screen s, Vec2 pos, uint16_t col) {
-    s.buffer[pos.y * 240 + pos.x] = col;
+    s.buffer[pos.y * s.size.x + pos.x] = col;
 }
 
 void draw_xline(Screen s, Vec2 pos, int len, uint16_t col) {
-    if (invalid_pixel(pos.y)) return;
+    if (pos.y >= s.size.y) return;
     for (int x = pos.x; x < pos.x + len; x++) {
-        if (invalid_pixel(x)) continue;
-        s.buffer[pos.y * 240 + x] = col;
+        if (x >= s.size.x) continue;
+        s.buffer[pos.y * s.size.x + x] = col;
     }
 }
 
 void draw_yline(Screen s, Vec2 pos, int len, uint16_t row) {
-    if (invalid_pixel(pos.x)) return;
+    if (pos.x >= s.size.x) return;
     for (int y = pos.y; y < pos.y + len; y++) {
-        if (invalid_pixel(y)) continue;
-        s.buffer[y * 240 + pos.x] = row;
+        if (y >= s.size.y) continue;
+        s.buffer[y * s.size.x + pos.x] = row;
     }
 }
 
@@ -129,8 +125,8 @@ void draw_line(Screen s, Vec2 a, Vec2 b, uint16_t colour) {
     int e2;
 
     while (true) {
-        if (invalid_pixel(a.x) || invalid_pixel(a.y)) continue;
-        s.buffer[a.y * 240 + a.x] = colour;
+        if (a.x >= s.size.x || a.y >= s.size.y || a.x < 0 || a.y < 0) continue;
+        s.buffer[a.y * s.size.x + a.x] = colour;
         if (a.x == b.x && a.y == b.y)
             break;
         e2 = 2*err;
@@ -156,8 +152,8 @@ Vec3 vec3(int x, int y, int z) {
 void draw_rect(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
     for (int y = pos.y; y < pos.y + size.y; y++) {
         for (int x = pos.x; x < pos.x + size.x; x++) {
-            if (invalid_pixel(x) || invalid_pixel(y)) continue;
-            s.buffer[y * 240 + x] = colour;
+            if (x >= s.size.x || y >= s.size.y || x < 0 || y < 0) continue;
+            s.buffer[y * s.size.x + x] = colour;
         }
     }
 }
@@ -169,7 +165,7 @@ void draw_circle(Screen s, Vec2 pos, uint16_t radius, uint16_t colour) {
     int y_max = pos.y + radius;
 
     if (y_min < 0) y_min = 0;
-    if (y_max >= SCREEN_HEIGHT) y_max = SCREEN_HEIGHT - 1;
+    if (y_max >= s.size.y) y_max = s.size.y - 1;
 
     for (int y = y_min; y <= y_max; y++) {
         int dy = y - pos.y;
@@ -179,9 +175,9 @@ void draw_circle(Screen s, Vec2 pos, uint16_t radius, uint16_t colour) {
         int x2 = pos.x + dx_max;
 
         if (x1 < 0) x1 = 0;
-        if (x2 >= SCREEN_WIDTH) x2 = SCREEN_WIDTH - 1;
+        if (x2 >= s.size.x) x2 = s.size.x - 1;
 
-        uint16_t *row = &s.buffer[y * SCREEN_WIDTH];
+        uint16_t *row = &s.buffer[y * s.size.x];
         for (int x = x1; x <= x2; x++) {
             row[x] = colour;
         }
@@ -193,9 +189,9 @@ void draw_mask(Screen s, MaskImage img, Vec2 pos, const uint16_t *colours) {
     for (int i = 0; i < img.size.y; i++) {
         for (int j = 0; j < img.size.x; j++) {
             uint8_t pix = img.data[i * img.size.x + j];
-            if (invalid_pixel(pos.x+j) || invalid_pixel(pos.y+i)) continue;
+            if (pos.x+j >= s.size.x || pos.x+j < 0 || pos.y+i >= s.size.y || pos.y < 0) continue;
             if (pix != 0) {
-                s.buffer[pos.x + j + (pos.y + i) * 240] = colours[pix - 1];
+                s.buffer[pos.x + j + (pos.y + i) * s.size.x] = colours[pix - 1];
             }
         }
     }
@@ -215,12 +211,12 @@ void draw_mask(Screen s, MaskImage img, Vec2 pos, const uint16_t *colours) {
 void draw_palette(Screen s, PaletteImage img, Vec2 pos) {
     for (int i = 0; i < img.size.y; i++) {
         for (int j = 0; j < img.size.x; j++) {
-            if (invalid_pixel(pos.x+j) || invalid_pixel(pos.y+i)) continue;
+            if (pos.x+j >= s.size.x || pos.x+j < 0 || pos.y+i >= s.size.y || pos.y < 0) continue;
             //     printf("Out of range (coloured) %d %d %d %d\n", x, j, y, i);
             // }
             unsigned char px = img.data[i * img.size.x + j];
             int colour = img.palette[px];
-            if (colour != 0b0000100000100001) s.buffer[pos.x + j + (pos.y + i) * 240] = colour;
+            if (colour != 0b0000100000100001) s.buffer[pos.x + j + (pos.y + i) * s.size.x] = colour;
         }
     }
 }
@@ -271,8 +267,8 @@ void draw_gradient(
 
             int px = pos.x + x;
             int py = pos.y + y;
-            if (!invalid_pixel(px) && !invalid_pixel(py))
-                s.buffer[py * SCREEN_WIDTH + px] = base;
+            // if (!invalid_pixel(px) && !invalid_pixel(py))
+            s.buffer[py * s.size.x + px] = base;
         }
     }
 }

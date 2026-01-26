@@ -9,7 +9,7 @@ project(my_project)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-add_definitions("-W -Wall -Wunreachable-code  -Wwrite-strings -Wpointer-arith -Wbad-function-cast -Wcast-align -Wcast-qual -fstack-usage")
+add_definitions("-W -Wall -Wunreachable-code  -Wwrite-strings -Wpointer-arith -Wbad-function-cast -Wcast-align -Wcast-qual -fstack-usage -DUSE_PRINTF -DUSE_DBG_PRINTF")
 
 add_executable(main
     src/main.c
@@ -45,10 +45,35 @@ add_executable(main
     lib/libmad/synth.c
     lib/libmad/timer.c
     lib/libmad/version.c
-)
 
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/ff15/source/ff.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/ff15/source/ffsystem.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/ff15/source/ffunicode.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/sd_driver/dma_interrupts.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/sd_driver/sd_card.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/sd_driver/sd_timeouts.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/sd_driver/SPI/my_spi.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/sd_driver/SPI/sd_card_spi.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/sd_driver/SPI/sd_spi.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/sd_driver/SDIO/rp2040_sdio.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/sd_driver/SDIO/sd_card_sdio.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/src/crash.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/src/crc.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/src/f_util.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/src/ff_stdio.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/src/file_stream.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/src/glue.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/src/my_debug.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/src/my_rtc.c
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/src/util.c)
+
+target_include_directories(main PRIVATE
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/ff15/source
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/sd_driver
+    lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/include
+)
 # Add pico_stdlib library which aggregates commonly used features
-target_link_libraries(main pico_stdlib hardware_i2c hardware_pio hardware_clocks hardware_dma hardware_spi hardware_pwm pico_multicore)
+target_link_libraries(main pico_stdlib hardware_i2c hardware_pio hardware_clocks hardware_dma hardware_spi hardware_pwm pico_multicore pico_aon_timer)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(main 1)

@@ -6,9 +6,6 @@
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 240
 
-typedef struct {
-    uint16_t *buffer;
-} Screen;
 
 typedef struct {
     int x, y;
@@ -22,6 +19,11 @@ typedef struct Vec2f Vec2f;
 typedef struct {
     int x, y, z;
 } Vec3;
+
+typedef struct {
+    uint16_t *buffer;
+    Vec2 size;
+} Screen;
 
 typedef struct {
     uint8_t *data;
