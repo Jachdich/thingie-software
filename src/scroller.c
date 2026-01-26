@@ -85,7 +85,7 @@ static PaletteImage PLAYER_IMG_ALT = {
 /* ================== TILES ================== */
 /* --- GROUND --- */
 static uint8_t ground_pixels[TILE_SIZE * TILE_SIZE] = {
-    0, 4, 4, 4, 4, 4, 0, 4, 0, 4, 4, 4, 4, 4, 0, 0, 4, 4, 4, 4, 
+    0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 
     4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 
     4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 
@@ -395,76 +395,76 @@ static const uint16_t sections[][MAP_H][MAP_W] = {
         {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
         {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
     }, {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 8, 0, 0, 0, 0, 6, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0}, 
-        {0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 
-        {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, 
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 8, 0, 0, 0, 0, 6, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0},
+        {0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
         {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
     }, {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 4, 6, 6, 6, 4, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 4, 0, 7, 0, 4, 0, 0}, 
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 4, 6, 6, 6, 4, 0, 0},
+        {0, 0, 0, 0, 0, 0, 4, 0, 7, 0, 4, 0, 0},
         {0, 0, 0, 0, 0, 0, 4, 0, 3, 0, 4, 0, 0},
-        {0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 5, 0, 7, 0, 5, 0, 0}, 
-        {1, 1, 4, 3, 3, 3, 4, 3, 3, 3, 4, 1, 1}, 
-        {2, 2, 4, 0, 0, 0, 4, 0, 0, 0, 4, 2, 2}, 
+        {0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0},
+        {0, 0, 0, 0, 0, 0, 5, 0, 7, 0, 5, 0, 0},
+        {1, 1, 4, 3, 3, 3, 4, 3, 3, 3, 4, 1, 1},
+        {2, 2, 4, 0, 0, 0, 4, 0, 0, 0, 4, 2, 2},
         {2, 2, 4, 0, 0, 0, 4, 0, 0, 0, 4, 2, 2}
     }, {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0},
-        {0, 0, 0, 4, 3, 3, 3, 3, 3, 4, 0, 0, 0}, 
+        {0, 0, 0, 4, 3, 3, 3, 3, 3, 4, 0, 0, 0},
         {0, 0, 0, 5, 0, 0, 7, 0, 0, 5, 0, 0, 0},
-        {0, 3, 0, 5, 0, 7, 7, 7, 0, 5, 0, 3, 0}, 
+        {0, 3, 0, 5, 0, 7, 7, 7, 0, 5, 0, 3, 0},
         {0, 0, 0, 5, 0, 0, 7, 0, 0, 5, 0, 0, 0},
         {1, 1, 1, 4, 3, 0, 0, 0, 3, 4, 1, 1, 1},
         {2, 2, 2, 4, 0, 0, 3, 0, 0, 4, 2, 2, 2},
         {2, 2, 2, 4, 0, 0, 0, 0, 0, 4, 2, 2, 2}
     }, {
-        {0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 3, 0, 0, 0, 8, 0, 0, 0, 3, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 
-        {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, 
+        {0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 3, 0, 0, 0, 8, 0, 0, 0, 3, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
         {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
     }, {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 4, 0, 4, 0, 4, 0, 0, 0}, 
-        {0, 0, 0, 0, 4, 4, 0, 4, 0, 4, 4, 0, 0}, 
-        {0, 0, 0, 4, 4, 4, 0, 4, 0, 4, 4, 4, 0}, 
-        {0, 0, 4, 4, 4, 4, 7, 4, 0, 4, 4, 4, 4}, 
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 4, 0, 4, 0, 4, 0, 0, 0},
+        {0, 0, 0, 0, 4, 4, 0, 4, 0, 4, 4, 0, 0},
+        {0, 0, 0, 4, 4, 4, 0, 4, 0, 4, 4, 4, 0},
+        {0, 0, 4, 4, 4, 4, 7, 4, 0, 4, 4, 4, 4},
         {1, 1, 1, 1, 1, 1, 7, 1, 8, 1, 1, 1, 1},
-        {2, 2, 2, 2, 2, 2, 7, 2, 0, 2, 2, 2, 2}, 
+        {2, 2, 2, 2, 2, 2, 7, 2, 0, 2, 2, 2, 2},
         {2, 2, 2, 2, 2, 2, 0, 2, 0, 2, 2, 2, 2}
     }, {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0}, 
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
-        {0, 7, 0, 4, 3, 3, 3, 3, 3, 4, 0, 0, 0}, 
-        {0, 0, 0, 4, 0, 7, 7, 7, 7, 4, 0, 0, 0}, 
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 7, 0, 4, 3, 3, 3, 3, 3, 4, 0, 0, 0},
+        {0, 0, 0, 4, 0, 7, 7, 7, 7, 4, 0, 0, 0},
         {0, 3, 3, 4, 3, 4, 4, 6, 4, 4, 0, 0, 0},
-        {0, 0, 0, 4, 0, 4, 0, 5, 0, 5, 0, 0, 0}, 
-        {0, 0, 0, 4, 0, 5, 0, 4, 0, 5, 0, 0, 0}, 
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 
-        {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, 
+        {0, 0, 0, 4, 0, 4, 0, 5, 0, 5, 0, 0, 0},
+        {0, 0, 0, 4, 0, 5, 0, 4, 0, 5, 0, 0, 0},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
         {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
     }
 };
@@ -523,8 +523,6 @@ static void move_stars(struct ScrollerState *s, Screen screen) {
     float dt = (now - s->frame_start) / 1000.0f;
     s->frame_start = now; // reset
 
-    float scroll_px = dt * s->scroll_speed * TILE_SIZE; // float, pixels per frame
-
     for (int i = 0; i < MAX_STARS; i++) {
         Star *star = &s->stars[i];
 
@@ -569,17 +567,12 @@ void draw_stars(struct ScrollerState *s, Screen screen) {
 
         uint16_t sky = get_px(screen, vec2(star->x, star->y));
         int b = brightness_565(sky);
-        if (b >= 120)
-            continue;
-        if (star->off)
-            continue;
+        if (b >= 120 || star->off) continue;
+
         uint16_t col;
-        if (b < 30)
-            col = COL_WHITE;
-        else if (b < 70)
-            col = COL_LIGHT_GRAY;
-        else
-            col = COL_GRAY;
+        if (b < 30) col = COL_WHITE;
+        else if (b < 70) col = COL_LIGHT_GRAY;
+        else col = COL_GRAY;
 
         if (size <= 0 || size > 3) {
             draw_px(screen, vec2(star->x, star->y), col);
@@ -626,6 +619,18 @@ void draw_bg(struct ScrollerState *s, Screen screen) {
         case SKY_DAWN:        draw_sky_dawn(screen); break;
         case SKY_GRADIENT:    draw_sky_gradient(screen); break;
         default: return;
+    }
+    draw_gradient(screen, vec2(0, 0), vec2(SCREEN_W, INFO_H), COL_BLACK, COL_GRAY, RIGHT);
+}
+
+void draw_tiles(struct ScrollerState *s, Screen screen) {
+    for (int y = 0; y < MAP_H; y++) {
+        for (int x = 0; x < MAP_W; x++) {
+            enum Tile tile = s->map[y][x];
+            PaletteImage *img = tile_images[tile];
+            if (!img) continue;
+            draw_palette(screen, *img, vec2(x * TILE_SIZE - (int)scroll_px, INFO_H + y * TILE_SIZE));
+        }
     }
 }
 
@@ -726,7 +731,6 @@ static void damage(struct ScrollerState *s, int dmg) {
 }
 
 /* ================= Collision Helpers ================= */
-
 // Block or ground → fully solid
 bool solid_full(enum Tile t) {
     return t == TILE_BLOCK || t == TILE_GROUND || t == TILE_BREAKABLE || t == TILE_SPIKE;
@@ -743,14 +747,15 @@ bool solid_side(enum Tile t) {
 }
 
 /* ================= MAP STREAMING ================= */
-
 static void shift_map_left(struct ScrollerState *s) {
     for (int y = 0; y < MAP_H; y++) {
         for (int x = 0; x < MAP_W - 1; x++)
             s->map[y][x] = s->map[y][x + 1];
 
-        s->map[y][MAP_W - 1] =
-            sections[current_section][y][section_col];
+        uint16_t tile = sections[current_section][y][section_col];
+        s->map[y][MAP_W - 1] = tile;
+        try_spawn_grass(s, tile, MAP_W, y);
+        try_spawn_cloud(s, tile, MAP_W, y);
     }
 
     section_col++;
@@ -766,7 +771,6 @@ static void shift_map_left(struct ScrollerState *s) {
 
 /* ================= INIT ================= */
 void Scroller_init(struct ScrollerState *s) {
-    printf("init");
 	s->selected = 0;
 	s->view = SCROLLER_VIEW_PLAYING;
 
@@ -787,19 +791,8 @@ bool Scroller_paused(struct ScrollerState *s, Screen screen) {
     keypad_next_frame();
 
     draw_bg(s, screen);
-
-    for (int y = 0; y < MAP_H; y++) {
-        for (int x = 0; x < MAP_W; x++) {
-            PaletteImage *img = tile_images[sections[0][y][x]];
-            if (!img) continue;
-            draw_palette(screen, *img,
-                vec2(
-                    x * TILE_SIZE - (int)scroll_px,
-                    INFO_H + y * TILE_SIZE
-                )
-            );
-        }
-    }
+    draw_tiles(s, screen);
+    draw_decors(s, screen);
 
     draw_string(screen, "PAUSED", vec2(120, 25), COL_WHITE, font, MF_ALIGN_CENTER);
     draw_string(screen, high_buf, vec2(120, 60), COL_WHITE, font, MF_ALIGN_CENTER);
@@ -867,6 +860,8 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
         shift_map_left(s);
     }
 
+    float scroll_dx = dt * s->scroll_speed * TILE_SIZE;
+
     if (s->time_accum >= 1.0f) {
         s->time_accum -= 1.0f;
         s->seconds_alive++;
@@ -895,7 +890,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     s->player.vel.x *= 0.8;
     if (keypad_get(1,1).held) s->player.vel.x = -s->player.move_speed;
     if (keypad_get(3,1).held) s->player.vel.x = s->player.move_speed;
-    
+
     if (keypad_get(2,0).pressed && s->player.on_ground) {
         s->player.vel.y = JUMP_VEL;
         s->player.on_ground = false;
@@ -997,19 +992,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     /* -------- DRAW -------- */
     if (needs_stars(s->sky)) move_stars(s, screen);
     draw_bg(s, screen);
-
-    for (int y = 0; y < MAP_H; y++) {
-        for (int x = 0; x < MAP_W; x++) {
-            PaletteImage *img = tile_images[s->map[y][x]];
-            if (!img) continue;
-            draw_palette(screen, *img,
-                vec2(
-                    x * TILE_SIZE - (int)scroll_px,
-                    INFO_H + y * TILE_SIZE
-                )
-            );
-        }
-    }
+    draw_tiles(s, screen);
 
     draw_rect(screen, vec2(0, INFO_H), vec2(2, SCREEN_H - INFO_H), COL_RED);
 	draw_yline(screen, vec2(0, 0), INFO_H, COL_WHITE);
@@ -1027,15 +1010,10 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
 
     draw_string(screen, score_buf, vec2(2,3), COL_WHITE, font, MF_ALIGN_LEFT);
     draw_string(screen, time_buf, vec2(-2,3), COL_WHITE, font, MF_ALIGN_RIGHT);
-
-    long frame_end = to_ms_since_boot(get_absolute_time());
-    long frame_time = frame_end - now;
-
     return true;
 }
 
 bool Scroller_step(struct ScrollerState *s, Screen screen) {
-    if (keypad_get(0,0).f_pressed > 160) return false;
 	switch (s->view) {
 	    case SCROLLER_VIEW_PAUSED:
 	        return Scroller_paused(s, screen);
