@@ -18,9 +18,12 @@
 #define MAP_H 11
 
 #define MAX_STARS 35
+#define MAX_DECORS 30
+#define MIN_Z 0
+#define MAX_Z 10
 
 enum Tile {
-    TILE_EMPTY = 0,
+    TILE_EMPTY,
     TILE_GROUND,
     TILE_DIRT,
     TILE_PLATFORM,
@@ -31,6 +34,27 @@ enum Tile {
     TILE_HEART,
     TILE_SPIKE
 };
+
+enum Decor {
+    DECOR_GRASS,
+    DECOR_CLOUD,
+    DECOR_COUNT
+};
+
+typedef struct {
+    PaletteImage *data[8];
+    uint8_t size;
+    uint8_t chance;
+    uint8_t z;
+} DecorImage;
+
+typedef struct {
+    Vec2f pos;           // precise position on screen/world
+    uint8_t type;        // e.g., DECOR_GRASS
+    uint8_t image_idx;   // which image from decor_images[type]
+    uint8_t z;           // z-index for layering
+} DecorInstance;
+
 
 typedef struct {
     int16_t x, y;
@@ -74,6 +98,9 @@ struct ScrollerState {
 
     enum SkyType sky;
     Star stars[MAX_STARS];
+    DecorInstance decors[MAX_DECORS];
+    uint8_t decor_count;
+
     struct Player player;
     uint16_t map[MAP_H][MAP_W];
 

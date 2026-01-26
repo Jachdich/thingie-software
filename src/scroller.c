@@ -1,5 +1,6 @@
 //
-// Created by ignacy on 12/01/2026.
+// Created by Igi
+// Contributed to by James
 //
 
 #include "../include/scroller.h"
@@ -379,6 +380,222 @@ static PaletteImage *tile_images[] = {
     [TILE_HEART]     = &TILE_HEART_IMG,
     [TILE_SPIKE]     = &TILE_SPIKE_IMG
 };
+/* ============== DECORATIONS ============== */
+static uint8_t grass_1_pixels[TILE_SIZE * TILE_SIZE / 2] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
+    0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0,
+    0, 0, 0, 0, 0, 0, 3, 0, 4, 0, 4, 0, 0, 0, 0, 0, 4, 3, 0, 0,
+    0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0,
+    0, 0, 3, 0, 4, 0, 0, 3, 0, 0, 0, 3, 0, 4, 0, 0, 3, 0, 0, 4
+};
+
+static PaletteImage DECOR_GRASS_1 = {
+    .data = grass_1_pixels,
+    .size = {TILE_SIZE, TILE_SIZE / 2},
+    .palette = ground_palette
+};
+
+static uint8_t grass_2_pixels[TILE_SIZE * TILE_SIZE / 2] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 0,
+    0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 3,
+    0, 4, 3, 0, 4, 0, 0, 3, 0, 4, 0, 4, 0, 4, 0, 0, 3, 0, 0, 3
+};
+
+static PaletteImage DECOR_GRASS_2 = {
+    .data = grass_2_pixels,
+    .size = {TILE_SIZE, TILE_SIZE / 2},
+    .palette = ground_palette
+};
+
+static uint8_t grass_3_pixels[TILE_SIZE * TILE_SIZE / 2] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 0,
+    0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 3,
+    0, 4, 3, 0, 4, 0, 0, 3, 0, 4, 0, 4, 0, 4, 0, 0, 3, 0, 0, 3
+};
+
+static PaletteImage DECOR_GRASS_3 = {
+    .data = grass_3_pixels,
+    .size = {TILE_SIZE, TILE_SIZE / 2},
+    .palette = ground_palette
+};
+
+static uint8_t grass_4_pixels[TILE_SIZE * TILE_SIZE / 2] = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,3,0,0,0,0,4,0,0,0,3,0,0,0,4,0,0,0,0,
+    0,3,4,0,0,4,0,3,0,4,0,3,0,4,0,3,0,0,0,0,
+    0,4,3,0,3,3,0,4,0,3,0,4,0,3,3,4,0,0,0,0,
+    0,3,4,3,4,4,3,3,4,4,3,3,4,4,3,3,0,0,0,0
+};
+
+static PaletteImage DECOR_GRASS_4 = {
+    .data = grass_4_pixels,
+    .size = {TILE_SIZE, TILE_SIZE / 2},
+    .palette = ground_palette
+};
+
+static uint8_t grass_5_pixels[TILE_SIZE * TILE_SIZE / 2] = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,3,0,0,0,4,0,0,0,3,0,0,0,4,0,0,0,0,
+    0,0,3,4,0,0,4,3,0,0,3,4,0,0,4,3,0,0,0,0,
+    0,3,4,3,0,4,3,4,0,3,4,3,0,4,3,4,0,0,0,0,
+    0,4,3,4,3,3,4,3,4,4,3,4,3,3,4,3,0,0,0,0,
+    0,3,4,3,4,4,3,4,3,3,4,3,4,4,3,4,0,0,0,0
+};
+
+static PaletteImage DECOR_GRASS_5 = {
+    .data = grass_5_pixels,
+    .size = {TILE_SIZE, TILE_SIZE / 2},
+    .palette = ground_palette
+};
+
+static uint8_t grass_6_pixels[TILE_SIZE * TILE_SIZE / 2] = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,3,4,3,0,3,4,3,0,3,4,3,0,3,4,3,0,0,0,
+    0,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,0,0,0,0,
+    0,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,0,0,0,0,
+    0,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,0,0,0,0,
+    0,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,0,0,0,0
+};
+
+static PaletteImage DECOR_GRASS_6 = {
+    .data = grass_6_pixels,
+    .size = {TILE_SIZE, TILE_SIZE / 2},
+    .palette = ground_palette
+};
+
+static uint8_t grass_7_pixels[TILE_SIZE * TILE_SIZE / 2] = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,3,0,4,0,3,0,4,0,3,0,4,0,3,0,0,0,0,
+    0,0,3,4,0,3,4,0,3,4,0,3,4,0,3,4,0,0,0,0,
+    0,3,4,3,4,0,3,4,0,3,4,0,3,4,3,4,0,0,0,0,
+    0,4,3,4,3,4,0,3,4,0,3,4,0,3,4,3,0,0,0,0,
+    0,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,0,0,0,0
+};
+
+static PaletteImage DECOR_GRASS_7 = {
+    .data = grass_7_pixels,
+    .size = {TILE_SIZE, TILE_SIZE / 2},
+    .palette = ground_palette
+};
+
+static DecorImage GRASS_IMAGES = {
+    .data = {&DECOR_GRASS_1, &DECOR_GRASS_2, &DECOR_GRASS_3, &DECOR_GRASS_4, &DECOR_GRASS_5, &DECOR_GRASS_6, &DECOR_GRASS_7},
+    .size = 7,
+    .chance = 65,
+    .z = 5
+};
+
+static uint16_t cloud_palette[] = {COL_NONE,
+    COL_WHITE,  // body
+    COL_LIGHT_GRAY,  // dark
+    COL_GRAY,  // light
+    0,0,0, COL_WHITE, COL_BLACK
+};
+
+static uint8_t cloud_1_pixels[TILE_SIZE * TILE_SIZE / 2] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 0, 0,
+    0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 1, 1, 0, 0,
+    0, 1, 1, 3, 1, 3, 3, 3, 1, 3, 3, 3, 3, 3, 3, 1, 3, 1, 1, 0,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+static PaletteImage DECOR_CLOUD_1 = {
+    .data = cloud_1_pixels,
+    .size = {TILE_SIZE, TILE_SIZE / 2},
+    .palette = cloud_palette
+};
+
+static uint8_t cloud_2_pixels[TILE_SIZE * TILE_SIZE / 2] = {
+    0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0,
+    0, 0, 1, 1, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 0,
+    0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 0,
+    0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 1, 1, 0,
+    0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 1, 1, 0, 0,
+    0, 1, 1, 3, 2, 2, 3, 3, 1, 3, 3, 3, 3, 3, 3, 1, 3, 1, 1, 0,
+    0, 1, 1, 1, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0,
+    0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+static PaletteImage DECOR_CLOUD_2 = {
+    .data = cloud_2_pixels,
+    .size = {TILE_SIZE, TILE_SIZE / 2},
+    .palette = cloud_palette
+};
+
+static uint8_t cloud_3_pixels[TILE_SIZE * 2 * TILE_SIZE / 2] = {
+    0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    0, 0, 0, 1, 1, 2, 2, 2, 1, 1, 0, 0, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 2, 2, 1, 1, 1, 1, 0, 0,
+    0, 0, 0, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0,
+    0, 0, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0,
+    0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 3, 3, 1, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 3, 3, 3, 1, 1, 0,
+    0, 1, 1, 2, 2, 2, 3, 3, 3, 1, 1, 1, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 2, 2, 3, 3, 3, 1, 3, 1, 1, 1, 1, 0, 0,
+    0, 1, 1, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+static PaletteImage DECOR_CLOUD_3 = {
+    .data = cloud_3_pixels,
+    .size = {TILE_SIZE * 2, TILE_SIZE / 2},
+    .palette = cloud_palette
+};
+
+static DecorImage CLOUD_IMAGES = {
+    .data = {&DECOR_CLOUD_1, &DECOR_CLOUD_2, &DECOR_CLOUD_3},
+    .size = 3,
+    .chance = 5,
+    .z = 1
+};
+
+static DecorImage *decor_images[] = {
+    [DECOR_GRASS] = &GRASS_IMAGES,
+    [DECOR_CLOUD] = &CLOUD_IMAGES
+};
 
 /* ================= SECTIONS ================= */
 static const uint16_t sections[][MAP_H][MAP_W] = {
@@ -583,8 +800,98 @@ void draw_stars(struct ScrollerState *s, Screen screen) {
     }
 }
 
+/* =========== TILES =========== */
+static enum Tile get_tile(struct ScrollerState *s, int px, int py) {
+    int tx = (px + (int)scroll_px) / TILE_SIZE;
+    int ty = (py - INFO_H) / TILE_SIZE;
+
+    if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H)
+        return TILE_EMPTY;
+
+    return s->map[ty][tx];
+}
+
+static void set_tile(struct ScrollerState *s, int px, int py, enum Tile t) {
+    int tx = (px + (int)scroll_px) / TILE_SIZE;
+    int ty = (py - INFO_H) / TILE_SIZE;
+
+    if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H)
+        return;
+
+    s->map[ty][tx] = t;
+}
+
+void draw_tiles(struct ScrollerState *s, Screen screen) {
+    for (int y = 0; y < MAP_H; y++) {
+        for (int x = 0; x < MAP_W; x++) {
+            enum Tile tile = s->map[y][x];
+            PaletteImage *img = tile_images[tile];
+            if (!img) continue;
+            draw_palette(screen, *img, vec2(x * TILE_SIZE - (int)scroll_px, INFO_H + y * TILE_SIZE));
+        }
+    }
+}
+
+/* ============= DECORATION ============= */
+void spawn_decor(struct ScrollerState *s, float x, float y, uint8_t type) {
+    if (s->decor_count >= MAX_DECORS) return;
+    DecorImage *images = decor_images[type];
+    if (rand() % 100 > images->chance) return;
+    DecorInstance *d = &s->decors[s->decor_count++];
+    d->image_idx = rand() % images->size;
+    Vec2 size = images->data[d->image_idx]->size;
+    d->pos = vec2f(x - (TILE_SIZE - size.x), y - (TILE_SIZE - size.y));
+    d->type = type;
+    d->z = images->z;
+}
+
+void draw_decors(struct ScrollerState *s, Screen screen) {
+    for (uint8_t z = MIN_Z; z <= MAX_Z; z++) { // loop over layers
+        for (uint8_t i = 0; i < s->decor_count; i++) {
+            DecorInstance *d = &s->decors[i];
+            if (d->z != z) continue;
+            DecorImage *images = decor_images[d->type];
+            PaletteImage *img = images->data[d->image_idx];
+            draw_palette(screen, *img, vec2f_to_vec2(d->pos));
+        }
+    }
+}
+static void update_decors(struct ScrollerState *s, float dx) {
+    for (int i = 0; i < s->decor_count; i++) {
+        s->decors[i].pos.x -= dx;
+        Vec2 size = decor_images[s->decors[i].type]->data[s->decors[i].image_idx]->size;
+        if (s->decors[i].pos.x < -size.x) {
+            s->decors[i] = s->decors[--s->decor_count];
+            i--;
+        }
+    }
+}
+
+static void try_spawn_grass(struct ScrollerState *s, uint16_t tile, int x, int y) {
+    if (tile == TILE_GROUND) {
+        float px = x * TILE_SIZE + rand() % (TILE_SIZE / 2);
+        float py = INFO_H + y * TILE_SIZE;
+        spawn_decor(s, px, py, DECOR_GRASS);
+    }
+}
+
+static void try_spawn_cloud(struct ScrollerState *s, uint16_t tile, int x, int y) {
+    if (tile == TILE_EMPTY) {
+        float px = (MAP_W - 1) * TILE_SIZE + rand() % (TILE_SIZE / 2);
+        float py = INFO_H + (rand() % 2) * TILE_SIZE + (rand() % TILE_SIZE);
+
+        for (int i =0; i< s->decor_count; i++) {
+            DecorInstance other = s->decors[i];
+            if (other.type != DECOR_CLOUD) continue;
+            if ((other.pos.x + TILE_SIZE > px && other.pos.x - TILE_SIZE < px) &&
+                (other.pos.y + TILE_SIZE > py && other.pos.y - TILE_SIZE < py)) return;
+        }
+        spawn_decor(s, px, py, DECOR_CLOUD);
+    }
+}
 
 /* ============= DRAWING =========== */
+/* --- SKIES -- */
 void draw_sky_night(Screen screen) {
     Vec2 center = vec2(SCREEN_W / 2, SCREEN_H - INFO_H);
     int radius = 170;
@@ -623,38 +930,7 @@ void draw_bg(struct ScrollerState *s, Screen screen) {
     draw_gradient(screen, vec2(0, 0), vec2(SCREEN_W, INFO_H), COL_BLACK, COL_GRAY, RIGHT);
 }
 
-void draw_tiles(struct ScrollerState *s, Screen screen) {
-    for (int y = 0; y < MAP_H; y++) {
-        for (int x = 0; x < MAP_W; x++) {
-            enum Tile tile = s->map[y][x];
-            PaletteImage *img = tile_images[tile];
-            if (!img) continue;
-            draw_palette(screen, *img, vec2(x * TILE_SIZE - (int)scroll_px, INFO_H + y * TILE_SIZE));
-        }
-    }
-}
-
 /* ================= HELPERS ================= */
-static enum Tile get_tile(struct ScrollerState *s, int px, int py) {
-    int tx = (px + (int)scroll_px) / TILE_SIZE;
-    int ty = (py - INFO_H) / TILE_SIZE;
-
-    if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H)
-        return TILE_EMPTY;
-
-    return s->map[ty][tx];
-}
-
-static void set_tile(struct ScrollerState *s, int px, int py, enum Tile t) {
-    int tx = (px + (int)scroll_px) / TILE_SIZE;
-    int ty = (py - INFO_H) / TILE_SIZE;
-
-    if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H)
-        return;
-
-    s->map[ty][tx] = t;
-}
-
 static void reset_time(struct ScrollerState *s) {
     s->frame_start = 0;
     s->last_time_ms = to_ms_since_boot(get_absolute_time());
@@ -687,6 +963,15 @@ static void handle_reset(struct ScrollerState *s) {
     for (int y = 0; y < MAP_H; y++) {
         for (int x = 0; x < MAP_W; x++) {
             s->map[y][x] = sections[current_section][y][x];
+        }
+    }
+
+    s->decor_count = 0;
+    for (int y = 0; y < MAP_H; y++) {
+        for (int x = 0; x < MAP_W; x++) {
+            uint16_t tile = s->map[y][x];
+            if ((rand() % 100) < 50) try_spawn_grass(s, tile, x, y);
+            if ((rand() % 100) < 20) try_spawn_cloud(s, tile, x, y);
         }
     }
 
@@ -861,6 +1146,7 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
     }
 
     float scroll_dx = dt * s->scroll_speed * TILE_SIZE;
+    update_decors(s, scroll_dx);
 
     if (s->time_accum >= 1.0f) {
         s->time_accum -= 1.0f;
@@ -999,6 +1285,8 @@ bool Scroller_main(struct ScrollerState *s, Screen screen) {
 	draw_yline(screen, vec2(SCREEN_W - 1, 0), INFO_H, COL_WHITE);
     draw_xline(screen, vec2(0, INFO_H), SCREEN_W, COL_WHITE);
     draw_xline(screen, vec2(0, 0), SCREEN_W, COL_WHITE);
+
+    draw_decors(s, screen);
 
     if (invulnerable && (s->player.invulnerable == 1 || s->time_accum < 0.1 || (0.6 < s->time_accum && s->time_accum < 0.7))) draw_palette(screen, PLAYER_IMG_ALT, vec2f_to_vec2(s->player.pos));
     else draw_palette(screen, PLAYER_IMG, vec2f_to_vec2(s->player.pos));
