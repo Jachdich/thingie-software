@@ -52,10 +52,11 @@ enum SkyType {
 };
 
 struct Player {
-    Vec2 pos;
-    Vec2 vel;
+    Vec2f pos;
+    Vec2f vel;
     bool on_ground;
     int lives;
+    float move_speed;
 	int invulnerable;
 };
 
