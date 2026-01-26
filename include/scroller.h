@@ -38,6 +38,7 @@ enum Tile {
 enum Decor {
     DECOR_GRASS,
     DECOR_CLOUD,
+    DECOR_PEBBLE,
     DECOR_COUNT
 };
 

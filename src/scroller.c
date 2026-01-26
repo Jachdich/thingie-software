@@ -517,7 +517,7 @@ static PaletteImage DECOR_GRASS_7 = {
 static DecorImage GRASS_IMAGES = {
     .data = {&DECOR_GRASS_1, &DECOR_GRASS_2, &DECOR_GRASS_3, &DECOR_GRASS_4, &DECOR_GRASS_5, &DECOR_GRASS_6, &DECOR_GRASS_7},
     .size = 7,
-    .chance = 65,
+    .chance = 55,
     .z = 5
 };
 
@@ -589,12 +589,48 @@ static DecorImage CLOUD_IMAGES = {
     .data = {&DECOR_CLOUD_1, &DECOR_CLOUD_2, &DECOR_CLOUD_3},
     .size = 3,
     .chance = 5,
-    .z = 1
+    .z = 2
+};
+
+static uint8_t pebble_1_pixels[TILE_SIZE / 2 * TILE_SIZE / 4] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 2, 2, 0, 0, 0,
+    0, 0, 2, 0, 2, 2, 2, 2, 0, 0,
+    0, 2, 3, 3, 2, 3, 3, 3, 0, 0
+};
+
+static PaletteImage DECOR_PEBBLE_1 = {
+    .data = pebble_1_pixels,
+    .size = {TILE_SIZE / 2, TILE_SIZE / 4},
+    .palette = cloud_palette
+};
+
+static uint8_t pebble_2_pixels[TILE_SIZE / 2 * TILE_SIZE / 4] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 2, 0, 0,
+    0, 0, 0, 2, 0, 0, 2, 2, 3, 0,
+    0, 0, 2, 3, 3, 0, 3, 3, 3, 0
+};
+
+static PaletteImage DECOR_PEBBLE_2 = {
+    .data = pebble_2_pixels,
+    .size = {TILE_SIZE / 2, TILE_SIZE / 4},
+    .palette = cloud_palette
+};
+
+static DecorImage PEBBLE_IMAGES = {
+    .data = {&DECOR_PEBBLE_1, &DECOR_PEBBLE_2},
+    .size = 2,
+    .chance = 45,
+    .z = 6
 };
 
 static DecorImage *decor_images[] = {
-    [DECOR_GRASS] = &GRASS_IMAGES,
-    [DECOR_CLOUD] = &CLOUD_IMAGES
+    [DECOR_GRASS]  = &GRASS_IMAGES,
+    [DECOR_CLOUD]  = &CLOUD_IMAGES,
+    [DECOR_PEBBLE] = &PEBBLE_IMAGES
 };
 
 /* ================= SECTIONS ================= */
@@ -840,7 +876,7 @@ void spawn_decor(struct ScrollerState *s, float x, float y, uint8_t type) {
     DecorInstance *d = &s->decors[s->decor_count++];
     d->image_idx = rand() % images->size;
     Vec2 size = images->data[d->image_idx]->size;
-    d->pos = vec2f(x - (TILE_SIZE - size.x), y - (TILE_SIZE - size.y));
+    d->pos = vec2f(x - size.x, y - size.y);
     d->type = type;
     d->z = images->z;
 }
@@ -872,6 +908,14 @@ static void try_spawn_grass(struct ScrollerState *s, uint16_t tile, int x, int y
         float px = x * TILE_SIZE + rand() % (TILE_SIZE / 2);
         float py = INFO_H + y * TILE_SIZE;
         spawn_decor(s, px, py, DECOR_GRASS);
+    }
+}
+
+static void try_spawn_pebble(struct ScrollerState *s, uint16_t tile, int x, int y) {
+    if (tile == TILE_GROUND) {
+        float px = x * TILE_SIZE + rand() % (TILE_SIZE / 2);
+        float py = INFO_H + y * TILE_SIZE;
+        spawn_decor(s, px, py, DECOR_PEBBLE);
     }
 }
 
@@ -971,6 +1015,7 @@ static void handle_reset(struct ScrollerState *s) {
         for (int x = 0; x < MAP_W; x++) {
             uint16_t tile = s->map[y][x];
             if ((rand() % 100) < 50) try_spawn_grass(s, tile, x, y);
+            if ((rand() % 100) < 40) try_spawn_pebble(s, tile, x, y);
             if ((rand() % 100) < 20) try_spawn_cloud(s, tile, x, y);
         }
     }
@@ -1040,6 +1085,7 @@ static void shift_map_left(struct ScrollerState *s) {
         uint16_t tile = sections[current_section][y][section_col];
         s->map[y][MAP_W - 1] = tile;
         try_spawn_grass(s, tile, MAP_W, y);
+        try_spawn_pebble(s, tile, MAP_W, y);
         try_spawn_cloud(s, tile, MAP_W, y);
     }
 
