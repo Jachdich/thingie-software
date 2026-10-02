@@ -73,7 +73,7 @@ target_include_directories(main PRIVATE
     lib/no-OS-FatFS-SD-SDIO-SPI-RPi-Pico/src/include
 )
 # Add pico_stdlib library which aggregates commonly used features
-target_link_libraries(main pico_stdlib hardware_i2c hardware_pio hardware_clocks hardware_dma hardware_spi hardware_pwm pico_multicore pico_aon_timer)
+target_link_libraries(main pico_stdlib hardware_i2c hardware_adc hardware_pio hardware_clocks hardware_dma hardware_spi hardware_pwm pico_multicore pico_aon_timer)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(main 1)

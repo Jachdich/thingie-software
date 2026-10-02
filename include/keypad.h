@@ -16,5 +16,7 @@ void keypad_read();
 struct Key keypad_get(int x, int y);
 bool irq_update_keypad(repeating_timer_t *);
 void keypad_next_frame();
+void keypad_reset_watchdog();
+bool keypad_was_next_frame_called();
 
 #endif

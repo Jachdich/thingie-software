@@ -13,6 +13,15 @@ struct Key keypad[12];
 struct Key keypad_last_frame[12];
 uint32_t times[12];
 
+bool next_frame_called = false;
+void keypad_reset_watchdog() {
+    next_frame_called = false;
+}
+
+bool keypad_was_next_frame_called() {
+    return next_frame_called;
+}
+
 void keypad_init() {
     for (int i = 0; i < 6; i++) {
         gpio_init(button_pins[i]);
@@ -34,6 +43,7 @@ bool irq_update_keypad(repeating_timer_t *_) {
 }
 
 void keypad_next_frame() {
+    next_frame_called = true;
     memcpy(keypad_last_frame, keypad, sizeof(keypad));
     // memset(keypad, 0, sizeof(keypad));
     for (int i = 0; i < 12; i++) {
