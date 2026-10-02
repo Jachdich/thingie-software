@@ -55,7 +55,7 @@ static inline void lcd_set_dc_cs(bool dc, bool cs) {
     sleep_us(1);
 }
 
-static inline void lcd_write_cmd(PIO pio, uint sm, const uint8_t *cmd, size_t count) {
+static inline void lcd_write_cmd(PST7789 *st, const uint8_t *cmd, size_t count) {
     st7789_lcd_wait_idle(pio, sm);
     lcd_set_dc_cs(0, 0);
     st7789_lcd_put(pio, sm, *cmd++);
@@ -69,7 +69,7 @@ static inline void lcd_write_cmd(PIO pio, uint sm, const uint8_t *cmd, size_t co
     lcd_set_dc_cs(1, 1);
 }
 
-static inline void lcd_init(PIO pio, uint sm, const uint8_t *init_seq) {
+static inline void lcd_init(ST7789 *st, const uint8_t *init_seq) {
     const uint8_t *cmd = init_seq;
     while (*cmd) {
         lcd_write_cmd(pio, sm, cmd + 2, *cmd);
@@ -78,8 +78,12 @@ static inline void lcd_init(PIO pio, uint sm, const uint8_t *init_seq) {
     }
 }
 
+void st7789_lcd_put(ST7789 *st, uint8_t v) {
+    spi_transfer(spi_t *spi_p, const uint8_t *tx, uint8_t *rx, size_t length)
+}
+
 #ifndef TESTING
-void st7789_start_pixels(PIO pio, uint sm) {
+void st7789_start_pixels(ST7789 *st) {
     uint8_t cmd = 0x2c; // RAMWR
     lcd_write_cmd(pio, sm, &cmd, 1);
     lcd_set_dc_cs(1, 0);
@@ -87,10 +91,6 @@ void st7789_start_pixels(PIO pio, uint sm) {
 #endif
 
 ST7789 st7789_init() {
-    PIO pio = pio1;
-    uint sm = 0;
-    uint offset = pio_add_program(pio, &st7789_lcd_program);
-    st7789_lcd_program_init(pio, sm, offset, PIN_DIN, PIN_CLK, SERIAL_CLK_DIV);
 
     gpio_init(PIN_CS);
     gpio_init(PIN_DC);
@@ -100,8 +100,14 @@ ST7789 st7789_init() {
     gpio_set_dir(PIN_DC, GPIO_OUT);
     gpio_set_dir(PIN_RESET, GPIO_OUT);
 
+
+    gpio_set_function(spi_p->miso_gpio, GPIO_FUNC_SPI);
+    gpio_set_function(spi_p->mosi_gpio, GPIO_FUNC_SPI);
+    gpio_set_function(spi_p->sck_gpio, GPIO_FUNC_SPI);
+
     gpio_put(PIN_CS, 1);
     gpio_put(PIN_RESET, 1);
-    lcd_init(pio, sm, st7789_init_seq);
+
+    lcd_init(st7789_init_seq);
     return (ST7789){.pio = pio, .sm = sm};
 }
