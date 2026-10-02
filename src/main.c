@@ -12,8 +12,10 @@
 #include "hardware/clocks.h"
 #include "hardware/i2c.h"
 #include "hardware/pwm.h"
+#include "hardware/adc.h"
 #include "pico/multicore.h"
 #include "pico/binary_info.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -186,13 +188,14 @@ enum MainView {
     MAINVIEW_SCROLLER,
     MAINVIEW_MUSIC,
     MAINVIEW_BRIGHTNESS,
+    MAINVIEW_DEBUG,
 };
 
 
 char bri[25] = "Brightness: 100.0%";
-const char *options[] = {"Snake", "Minesweeper", "Tetris", "Scroller", "Music", bri};
-const enum MainView states[] = {MAINVIEW_SNAKE, MAINVIEW_MINESWEEPER, MAINVIEW_TETRIS, MAINVIEW_SCROLLER, MAINVIEW_MUSIC, MAINVIEW_BRIGHTNESS};
-const int num_states = 6;
+const char *options[] = {"Snake", "Minesweeper", "Tetris", "Scroller", "Music", "Debug", bri};
+const enum MainView states[] = {MAINVIEW_SNAKE, MAINVIEW_MINESWEEPER, MAINVIEW_TETRIS, MAINVIEW_SCROLLER, MAINVIEW_MUSIC, MAINVIEW_DEBUG, MAINVIEW_BRIGHTNESS};
+const int num_states = 7;
 
 typedef struct {
     enum MainView view;
@@ -287,14 +290,14 @@ int debug_step(void *buf_, Screen s) {
     char buf[50];
     memset(buf, 0, 50);
     sprintf(buf, "%d", as5600_read_adc());
-    draw_string(s, buf, vec2(100, 100), 0xffff, font, MF_ALIGN_LEFT);
+    draw_string(s, buf, vec2(30, 100), 0xffff, font, MF_ALIGN_LEFT);
     memset(buf, 0, 50);
     sprintf(buf, "%d", angle);
-    draw_string(s, buf, vec2(100, 120), 0xffff, font, MF_ALIGN_LEFT);
+    draw_string(s, buf, vec2(30, 120), 0xffff, font, MF_ALIGN_LEFT);
     memset(buf, 0, 50);
 
     const float step = 0.2;
-    const Vec2 origin = vec2(120, 50);
+    const Vec2 origin = vec2(50, 50);
     const float r = 40;
     for (float theta = 0; theta < 3.141592 * 2; theta += step) {
         Vec2 a = vec2_add(origin, vec2(r * cos(theta - step), r * sin(theta - step)));
@@ -304,6 +307,15 @@ int debug_step(void *buf_, Screen s) {
 
     float theta = (float)angle / 4096.0 * 3.1415926535 * 2.0;
     draw_line(s, origin, vec2_add(origin, vec2(r * cos(theta), r * sin(theta))), 0xffff);
+
+    for (int x = 0; x < 4; x++) {
+        for (int y = 0; y < 3; y++) {
+            bool pressed = keypad_get(x, y).held;
+            if (pressed) {
+                draw_rect(s, vec2(100 + x * 10, 10 + y * 10), vec2(8, 8), 0xffff);
+            }
+        }
+    }
     return 1;
 }
 
@@ -418,6 +430,12 @@ int main() {
     pwm_set_wrap(bl_slice_num, 4095);
     pwm_set_enabled(bl_slice_num, true);
 
+    adc_init();
+
+    // Make sure GPIO is high-impedance, no pullups etc
+    adc_gpio_init(26);
+    // Select ADC input 0 (GPIO26)
+    adc_select_input(0);
     
     MenuState ms;
     menu_state_init(&ms);
@@ -460,6 +478,8 @@ int main() {
         if (keypad_get(0, 0).held && time1 - keypad_get(0, 0).us_pressed_at > 3 * 1000 * 1000) {
             ms.view = MAINVIEW_MENU;
         }
+
+        keypad_reset_watchdog();
        
         switch (ms.view) {
             case MAINVIEW_MENU:
@@ -490,9 +510,18 @@ int main() {
                     ms.view = MAINVIEW_MENU;
                 }
                 break;
+            case MAINVIEW_DEBUG:
+                if (!debug_step(game_state, s)) {
+                    ms.view = MAINVIEW_MENU;
+                }
+                break;
             case MAINVIEW_BRIGHTNESS:
                 ms.view = MAINVIEW_MENU; // this can't really be clicked on
                 break;
+        }
+
+        if (!keypad_was_next_frame_called()) {
+            keypad_next_frame();
         }
 
         
@@ -517,11 +546,20 @@ int main() {
         multicore_fifo_push_blocking(1);
         long time3 = to_us_since_boot(get_absolute_time());
 
+        const float conversion_factor = 3.3f / (1 << 12);
+
+        float batt_voltage = 0.0;
+        for (int i = 0; i < 100; i++) {
+            uint16_t result = adc_read();
+            batt_voltage += result * conversion_factor * 1.3727272727272728 * 1.0 / 100;
+        }
+        
         if (debug_enabled) {
-            sprintf(debug_string, "c:%lu r:%lu f:%lu t:%lu %f %.01f%%",
+            sprintf(debug_string, "c:%lu r:%lu f:%lu t:%lu %.01f %.01f%% %.02fV",
                     time1 - time, time2 - time1, time3 - time2, time3 - time,
                     1000000.0 / (float)(time3 - time),
-                    (time2 - time1) / (10000.0 / 60.0));
+                    (time2 - time1) / (10000.0 / 60.0),
+                batt_voltage);
         }
     }
 
