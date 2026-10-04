@@ -81,5 +81,5 @@ pico_enable_stdio_uart(main 0)
 
 # create map/bin/hex/uf2 file in addition to ELF.
 pico_add_extra_outputs(main)
-pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/lib/st7789/st7789_lcd.pio)
+# pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/lib/st7789/st7789_lcd.pio)
 pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/i2s.pio)

@@ -6,9 +6,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
+#include "hardware/spi.h"
 #include "hardware/gpio.h"
 #include "pico/time.h"
 
@@ -30,6 +33,17 @@
 
 #define bsb 0
 #define bsa 240
+
+// static spi_t spi = {
+//     .hw_inst = spi0,  // SPI component
+//     .sck_gpio = 18,    // GPIO number (not Pico pin number)
+//     .mosi_gpio = 19,
+//     .miso_gpio = 16,
+//     .baud_rate = 125 * 1000 * 1000 / 16  // 15625000 Hz
+//     //.baud_rate = 125 * 1000 * 1000 / 6  // 20833333 Hz
+//     // .baud_rate = 125 * 1000 * 1000 / 4  // 31250000 Hz
+//     //.baud_rate = 125 * 1000 * 1000 / 2  // 62500000 Hz
+// };
 
 // Format: cmd length (including cmd byte), post delay in units of 5 ms, then cmd payload
 // Note the delays have been shortened a little
@@ -55,42 +69,42 @@ static inline void lcd_set_dc_cs(bool dc, bool cs) {
     sleep_us(1);
 }
 
-static inline void lcd_write_cmd(PST7789 *st, const uint8_t *cmd, size_t count) {
-    st7789_lcd_wait_idle(pio, sm);
+static inline void lcd_write_cmd(const uint8_t *cmd, size_t count) {
+    // st7789_lcd_wait_idle();
     lcd_set_dc_cs(0, 0);
-    st7789_lcd_put(pio, sm, *cmd++);
+    st7789_lcd_put(*cmd++);
     if (count >= 2) {
-        st7789_lcd_wait_idle(pio, sm);
+        // st7789_lcd_wait_idle(pio, sm);
         lcd_set_dc_cs(1, 0);
         for (size_t i = 0; i < count - 1; ++i)
-            st7789_lcd_put(pio, sm, *cmd++);
+            st7789_lcd_put(*cmd++);
     }
-    st7789_lcd_wait_idle(pio, sm);
+    // st7789_lcd_wait_idle(pio, sm);
     lcd_set_dc_cs(1, 1);
 }
 
-static inline void lcd_init(ST7789 *st, const uint8_t *init_seq) {
+static inline void lcd_init(const uint8_t *init_seq) {
     const uint8_t *cmd = init_seq;
     while (*cmd) {
-        lcd_write_cmd(pio, sm, cmd + 2, *cmd);
+        lcd_write_cmd(cmd + 2, *cmd);
         sleep_ms(*(cmd + 1) * 5);
         cmd += *cmd + 2;
     }
 }
 
-void st7789_lcd_put(ST7789 *st, uint8_t v) {
-    spi_transfer(spi_t *spi_p, const uint8_t *tx, uint8_t *rx, size_t length)
+void st7789_lcd_put(uint8_t v) {
+    spi_transfer(spi0, &v, NULL, 1);
 }
 
 #ifndef TESTING
-void st7789_start_pixels(ST7789 *st) {
+void st7789_start_pixels() {
     uint8_t cmd = 0x2c; // RAMWR
-    lcd_write_cmd(pio, sm, &cmd, 1);
+    lcd_write_cmd(&cmd, 1);
     lcd_set_dc_cs(1, 0);
 }
 #endif
 
-ST7789 st7789_init() {
+void st7789_init() {
 
     gpio_init(PIN_CS);
     gpio_init(PIN_DC);
@@ -101,13 +115,15 @@ ST7789 st7789_init() {
     gpio_set_dir(PIN_RESET, GPIO_OUT);
 
 
-    gpio_set_function(spi_p->miso_gpio, GPIO_FUNC_SPI);
-    gpio_set_function(spi_p->mosi_gpio, GPIO_FUNC_SPI);
-    gpio_set_function(spi_p->sck_gpio, GPIO_FUNC_SPI);
+    const uint sck_gpio = 18;    // GPIO number (not Pico pin number)
+    const uint mosi_gpio = 19;
+    const uint miso_gpio = 16;
+    gpio_set_function(miso_gpio, GPIO_FUNC_SPI);
+    gpio_set_function(mosi_gpio, GPIO_FUNC_SPI);
+    gpio_set_function(sck_gpio, GPIO_FUNC_SPI);
 
     gpio_put(PIN_CS, 1);
     gpio_put(PIN_RESET, 1);
 
     lcd_init(st7789_init_seq);
-    return (ST7789){.pio = pio, .sm = sm};
 }

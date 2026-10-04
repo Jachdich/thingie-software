@@ -86,7 +86,7 @@ uint16_t *back_buffer;
 
 uint8_t *game_arena[32*1024]; // just allocate 32kiB for now...
 
-void st7789_lcd_put(PIO a, uint b, uint8_t n);
+void st7789_lcd_put(uint8_t n);
 
 // extern uint32_t read_ptr, write_ptr;
 
@@ -101,7 +101,7 @@ void st7789_lcd_put(PIO a, uint b, uint8_t n);
 //     float volume;
 //     int16_t samples[BUFFER_SIZE];
 // };
-void st7789_start_pixels(ST7789*);
+void st7789_start_pixels();
 
 
 void core1_entry() {
@@ -158,7 +158,7 @@ void core1_entry() {
 
 
     uint16_t **buffer = &front_buffer;
-    ST7789 st = st7789_init();
+    st7789_init();
     while (1) {
         uint32_t _ = multicore_fifo_pop_blocking();
         (void)_;
@@ -166,11 +166,11 @@ void core1_entry() {
         // Screen s = (Screen){ .buffer = *buffer, .size = vec2(240, 240)};
         // draw_string(s, buf, vec2(0, 0), 0xffff, mf_find_font("fixed_5x8"), MF_ALIGN_LEFT);
 
-        st7789_start_pixels(&st);
+        st7789_start_pixels();
         for (int i = 0; i < 240 * 240; i++) {
             uint16_t colour = (*buffer)[i];
-            st7789_lcd_put(st.pio, st.sm, colour >> 8);
-            st7789_lcd_put(st.pio, st.sm, colour & 0xff);
+            st7789_lcd_put(colour >> 8);
+            st7789_lcd_put(colour & 0xff);
         }
 
         
