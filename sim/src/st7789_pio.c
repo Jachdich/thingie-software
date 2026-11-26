@@ -7,6 +7,7 @@
 #include <SDL2/SDL_surface.h>
 #include <pthread.h>
 #include "pico/time.h"
+#include "ff.h"
 
 SDL_Surface *winSurface = NULL;
 SDL_Window *window = NULL;
@@ -135,6 +136,13 @@ void st7789_lcd_put(PIO a, uint b, uint8_t n) {
             x = 0;
             y += 1;
         }
+    }
+}
+void spi_write16_blocking(hw_spi spi, uint16_t *buf, uint16_t len) {
+    PIO a;
+    for (uint16_t i = 0; i < len; i++) {
+        st7789_lcd_put(a, 0, buf[i] >> 8);
+        st7789_lcd_put(a, 0, buf[i] & 0xff);
     }
 }
 

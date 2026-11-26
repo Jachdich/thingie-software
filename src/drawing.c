@@ -142,13 +142,6 @@ void draw_line(Screen s, Vec2 a, Vec2 b, uint16_t colour) {
     }
 }
 
-Vec2 vec2(int x, int y) {
-    return (Vec2){x, y};
-}
-Vec3 vec3(int x, int y, int z) {
-    return (Vec3){x, y, z};
-}
-
 void draw_rect(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
     for (int y = pos.y; y < pos.y + size.y; y++) {
         for (int x = pos.x; x < pos.x + size.x; x++) {
@@ -156,6 +149,13 @@ void draw_rect(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
             s.buffer[y * s.size.x + x] = colour;
         }
     }
+}
+
+void draw_rect_lines(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
+    draw_xline(s, pos, size.x, colour);
+    draw_xline(s, vec2_add(pos, vec2(0, size.y)), size.x, colour);
+    draw_yline(s, pos, size.y, colour);
+    draw_yline(s, vec2_add(pos, vec2(size.x, 0)), size.x, colour);
 }
 
 void draw_circle(Screen s, Vec2 pos, uint16_t radius, uint16_t colour) {
@@ -271,38 +271,4 @@ void draw_gradient(
             s.buffer[py * s.size.x + px] = base;
         }
     }
-}
-
-// TODO these would probably benefit from inlining
-// see https://stackoverflow.com/questions/60133817/how-do-i-inline-a-function-from-another-translation-unit
-Vec2 vec2_add(Vec2 a, Vec2 b) {
-    return vec2(a.x + b.x, a.y + b.y);
-}
-
-bool vec2_eq(Vec2 a, Vec2 b) {
-    return a.x == b.x && a.y == b.y;
-}
-
-Vec3 vec3_add(Vec3 a, Vec3 b) {
-    return vec3(a.x + b.x, a.y + b.y, a.z + b.z);
-}
-
-bool vec3_eq(Vec3 a, Vec3 b) {
-    return a.x == b.x && a.y == b.y && a.z == b.z;
-}
-
-Vec2f vec2f_add(Vec2f a, Vec2f b) {
-    return vec2f(a.x + b.x, a.y + b.y);
-}
-
-bool vec2f_eq(Vec2f a, Vec2f b) {
-    return a.x == b.x && a.y == b.y;
-}
-
-Vec2 vec2f_to_vec2(struct Vec2f v) {
-    return vec2((int)v.x, (int)v.y);
-}
-
-Vec2f vec2f(float x, float y) {
-    return (Vec2f){.x = x, .y = y};
 }

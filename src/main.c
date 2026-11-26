@@ -7,6 +7,7 @@
 #include "../include/snake.h"
 #include "../include/minesweeper.h"
 #include "../include/scroller.h"
+#include "../include/2048.h"
 #include "pico/time.h"
 #include "pico/stdlib.h"
 #include "hardware/clocks.h"
@@ -81,8 +82,8 @@ void music_init(void *);
 
 uint16_t framebuffer0[240*240];
 uint16_t framebuffer1[240*240];
-uint16_t *front_buffer;
-uint16_t *back_buffer;
+volatile uint16_t *front_buffer;
+volatile uint16_t *back_buffer;
 
 uint8_t *game_arena[32*1024]; // just allocate 32kiB for now...
 
@@ -104,6 +105,39 @@ void st7789_lcd_put(uint8_t n);
 void st7789_start_pixels();
 
 
+// FRESULT whatever() {
+//     FRESULT res;
+//     DIR dir;
+//     FILINFO fno;
+//     int nfile, ndir;
+
+    
+//     res = f_opendir(&dir, "/");                   /* Open the directory */
+//     if (res == FR_OK) {
+//         nfile = ndir = 0;
+//         for (;;) {
+//             res = f_readdir(&dir, &fno);           /* Read a directory item */
+//             if (fno.fname[0] == 0) break;          /* Error or end of dir */
+//             if (fno.fattrib & AM_DIR) {            /* It is a directory */
+//                 ndir++;
+//             } else {                               /* It is a file */
+//                 nfile++;
+//             }
+//         }
+//         f_closedir(&dir);
+//     }
+
+//     return res;
+// }
+
+
+#define MP3_BUF_SIZE 1024
+
+volatile uint32_t read_ptr = 0;
+volatile uint32_t write_ptr = 0;
+volatile uint8_t mp3_buf[MP3_BUF_SIZE];
+volatile uint32_t seek_pos = 0;
+
 void core1_entry() {
     alarm_pool_t *pool = alarm_pool_create_with_unused_hardware_alarm(1);
     repeating_timer_t timer;
@@ -111,66 +145,106 @@ void core1_entry() {
     
     // struct MusicState *state = (struct MusicState*)game_arena;
  
-    // char buf[100];
-    // // See FatFs - Generic FAT Filesystem Module, "Application Interface",
-    // // http://elm-chan.org/fsw/ff/00index_e.html
-    // FATFS fs;
-    // FRESULT fr = f_mount(&fs, "", 1);
-    // if (FR_OK != fr) {
-    //     sprintf(buf, "f_mount error: %s (%d)\n", FRESULT_str(fr), fr);
-    //     goto end;
-    // }
+    // sleep_ms(1000);
+    char buf[1000];
+    char *buf_ptr = buf;
+    // See FatFs - Generic FAT Filesystem Module, "Application Interface",
+    // http://elm-chan.org/fsw/ff/00index_e.html
+    FATFS fs;
 
-    // // Open a file and write to it
-    // FIL fil;
-    // const char* const filename = "filename.txt";
-    // fr = f_open(&fil, filename, FA_OPEN_APPEND | FA_WRITE);
-    // if (FR_OK != fr && FR_EXIST != fr) {
-    //     sprintf(buf, "f_open(%s) error: %s (%d)\n", filename, FRESULT_str(fr), fr);
-    //     goto end;
-    // } else {
-        
-    //     printf("open ok\n");
-    // }
-    // if (f_printf(&fil, "Hello, world!\n") < 0) {
-    //     sprintf(buf,"f_printf failed\n");
-    //     goto end;
-    // } else {
-    //     printf("write ok\n");
-    // }
+     // // Open a file and write to it
+     // FIL fil;
+     // const char* const filename = "filename2.txt";
+     // fr = f_open(&fil, filename, FA_OPEN_APPEND | FA_WRITE);
+     // if (FR_OK != fr && FR_EXIST != fr) {
+     //     sprintf(buf, "f_open(%s) error: %s (%d)\n", filename, FRESULT_str(fr), fr);
+     //     goto end;
+     // } else {
+     //     printf("open ok\n");
+     // }
+     // if (f_printf(&fil, "FatFs is a generic FAT/exFAT filesystem module for small embedded systems. The FatFs module is written in compliance with ANSI C (C89) and completely separated from the disk control layer. Therefore it is independent of the platforms and storage devices. It can be incorporated into small microcontrollers with limited resource, such as 8051, PIC, AVR, ARM, Z80, RX and etc. Also Petit FatFs module for very memory-tight systems is available here.\n") < 0) {
+     //     sprintf(buf,"f_printf failed\n");
+     //     goto end;
+     // } else {
+     //     printf("write ok\n");
+     // }
 
-    // // Close the file
-    // fr = f_close(&fil);
-    // if (FR_OK != fr) {
-    //     sprintf(buf, "f_close error: %s (%d)\n", FRESULT_str(fr), fr);
-    //     goto end;
-    // } else {
-    //     printf("close ok\n");
-    // }
+     // // Close the file
+     // fr = f_close(&fil);
+     // if (FR_OK != fr) {
+     //     sprintf(buf, "f_close error: %s (%d)\n", FRESULT_str(fr), fr);
+     //     goto end;
+     // } else {
+     //     printf("close ok\n");
+     // }
 
-    // // Unmount the SD card
-    // f_unmount("");
-    // printf("umount ok\n");
-    // sprintf(buf, "all ok!!");
+    
+     // end:;
 
-    // end:
-    // sleep_ms(500);
-
-
-    uint16_t **buffer = &front_buffer;
+    volatile uint16_t **buffer = &front_buffer;
     st7789_init();
+    long a = to_us_since_boot(get_absolute_time());
+
+    
     while (1) {
         uint32_t _ = multicore_fifo_pop_blocking();
         (void)_;
 
-        // Screen s = (Screen){ .buffer = *buffer, .size = vec2(240, 240)};
-        // draw_string(s, buf, vec2(0, 0), 0xffff, mf_find_font("fixed_5x8"), MF_ALIGN_LEFT);
+        Screen s = (Screen){ .buffer = *buffer, .size = vec2(240, 240)};
+        draw_string_multiline(s, buf, vec2(0, 0), 0xffff, mf_find_font("fixed_5x8"));
 
         st7789_start_pixels();
-        for (int i = 0; i < 240 * 240; i++) {
-            uint16_t colour = (*buffer)[i];
-            st7789_lcd_put(colour >> 8);
-            st7789_lcd_put(colour & 0xff);
+        spi_write16_blocking(spi0, *buffer, 240 * 240);
+        lcd_set_dc_cs(1, 1);
+        gpio_put(28, 1);
+        // for (int i = 0; i < 240 * 240; i++) {
+        //     uint16_t colour = (*buffer)[i];
+        //     st7789_lcd_put(colour >> 8);
+        //     st7789_lcd_put(colour & 0xff);
+        // }
+        if ((write_ptr - read_ptr) % MP3_BUF_SIZE < 10) {
+            sleep_ms(10);
+            FRESULT fr = f_mount(&fs, "", 1);
+            if (FR_OK != fr) {
+                buf_ptr += sprintf(buf_ptr, "f_mount error: %s (%d)\n", FRESULT_str(fr), fr);
+            }
+            FIL fil;        /* File object */
+
+            /* Open a text file */
+            fr = f_open(&fil, "filename2.txt", FA_READ);
+            if (fr != FR_OK) {
+                buf_ptr += sprintf(buf_ptr, "Error: %s\n", FRESULT_str(fr));
+                continue;
+            }
+
+            fr = f_lseek(&fil, seek_pos);
+            if (fr != FR_OK) {
+                buf_ptr += sprintf(buf_ptr, "Error (seek): %s\n", FRESULT_str(fr));
+                continue;
+            }
+
+            char buf[10];
+            uint32_t read = 0;
+            f_read(&fil, buf, 10, &read);
+            for (uint32_t i = 0; i < read; i++) {
+                mp3_buf[write_ptr] = buf[i];
+                write_ptr = (write_ptr + 1) % MP3_BUF_SIZE;
+            }
+
+            /* Close the file */
+            f_close(&fil);
+            f_unmount("");
+
+            buf_ptr += sprintf(buf_ptr, " <read %d bytes> ", read);
+        }
+
+        long b = to_us_since_boot(get_absolute_time());
+        if (b - a > 1 * 1000 * 1000) {
+            a = to_us_since_boot(get_absolute_time());
+            *buf_ptr = mp3_buf[read_ptr];
+            buf_ptr += 1;
+            *buf_ptr = 0;
+            read_ptr = (read_ptr + 1) % MP3_BUF_SIZE;
         }
 
         
@@ -186,6 +260,7 @@ enum MainView {
     MAINVIEW_MINESWEEPER,
     MAINVIEW_TETRIS,
     MAINVIEW_SCROLLER,
+    MAINVIEW_2048,
     MAINVIEW_MUSIC,
     MAINVIEW_BRIGHTNESS,
     MAINVIEW_DEBUG,
@@ -193,9 +268,9 @@ enum MainView {
 
 
 char bri[25] = "Brightness: 100.0%";
-const char *options[] = {"Snake", "Minesweeper", "Tetris", "Scroller", "Music", "Debug", bri};
-const enum MainView states[] = {MAINVIEW_SNAKE, MAINVIEW_MINESWEEPER, MAINVIEW_TETRIS, MAINVIEW_SCROLLER, MAINVIEW_MUSIC, MAINVIEW_DEBUG, MAINVIEW_BRIGHTNESS};
-const int num_states = 7;
+const char *options[] = {"Snake", "Minesweeper", "Tetris", "Scroller", "2048", "Music", "Debug", bri};
+const enum MainView states[] = {MAINVIEW_SNAKE, MAINVIEW_MINESWEEPER, MAINVIEW_TETRIS, MAINVIEW_SCROLLER, MAINVIEW_2048, MAINVIEW_MUSIC, MAINVIEW_DEBUG, MAINVIEW_BRIGHTNESS};
+const int num_states = 8;
 
 typedef struct {
     enum MainView view;
@@ -252,6 +327,9 @@ void draw_menu(Screen s, void *game_state, MenuState *ms) {
                 break;
             case MAINVIEW_SCROLLER:
                 Scroller_init(game_state);
+                break;
+            case MAINVIEW_2048:
+                two048_init(game_state);
                 break;
             case MAINVIEW_MUSIC: {
                 music_init(game_state);
@@ -377,26 +455,26 @@ void draw_box(Screen s, Vec2 pos, Vec2 size, uint16_t colour) {
     draw_yline(s, vec2_add(pos, vec2(size.x - 1, 0)), size.y, colour);
 }
 
-// int music_step(void *memory, Screen s) {
-//     const struct mf_font_s *font = mf_find_font("DejaVuSans12");
-//     struct Arena arena = Arena_new(memory, 10 * 1024); // TODO this is hard coded
+int music_step2(void *memory, Screen s) {
+    const struct mf_font_s *font = mf_find_font("DejaVuSans12");
+    struct Arena arena = Arena_new(memory, 10 * 1024); // TODO this is hard coded
 
-//     const struct TestSong songs[] = {
-//         (struct TestSong){"title", "album", "artist"},
-//         (struct TestSong){"title2", "album2", "artist2"},
-//     };
+    const struct TestSong songs[] = {
+        (struct TestSong){"title", "album", "artist"},
+        (struct TestSong){"title2", "album2", "artist2"},
+    };
 
-//     for (int i = 0; i < 2; i++) {
-//         draw_string(s, songs[i].name, vec2(0, i * 14), 0xffff, font, MF_ALIGN_LEFT);
-//     }
+    for (int i = 0; i < 2; i++) {
+        draw_string(s, songs[i].name, vec2(0, i * 14), 0xffff, font, MF_ALIGN_LEFT);
+    }
 
-//     draw_string(s, "some song | some artist", vec2(4, 240 - 12 - 16), 0xffff, font, MF_ALIGN_LEFT);
-//     draw_string(s, "44:30", vec2(240 - 4, 240 - 12 - 16), 0xffff, font, MF_ALIGN_RIGHT);
+    draw_string(s, "some song | some artist", vec2(4, 240 - 12 - 16), 0xffff, font, MF_ALIGN_LEFT);
+    draw_string(s, "44:30", vec2(240 - 4, 240 - 12 - 16), 0xffff, font, MF_ALIGN_RIGHT);
 
-//     draw_box(s,  vec2(0, 240 - 10), vec2(240, 10), 0b1100011000011000);
-//     draw_rect(s, vec2(1, 240 - 9),  vec2((240 - 2) / 2, 8), 0xffff);
-//     return 1;
-// }
+    draw_box(s,  vec2(0, 240 - 10), vec2(240, 10), 0b1100011000011000);
+    draw_rect(s, vec2(1, 240 - 9),  vec2((240 - 2) / 2, 8), 0xffff);
+    return 1;
+}
 
 void audio_test(void);
 
@@ -452,6 +530,8 @@ int main() {
     // set_sys_clock_khz(200 * 1000, true);
     set_sys_clock_khz(132000, true);
 
+    float battery_voltage_avg = 0.0;
+
 
     const struct mf_font_s *mf_font_fixed_5x8 = mf_find_font("fixed_5x8");
     while (1) {
@@ -483,7 +563,8 @@ int main() {
        
         switch (ms.view) {
             case MAINVIEW_MENU:
-                draw_menu(s, game_state, &ms);
+                // draw_menu(s, game_state, &ms);
+                sleep_ms(50);
                 break;
             case MAINVIEW_SNAKE:
                 if (!Snake_step(game_state, s)) {
@@ -505,8 +586,13 @@ int main() {
                     ms.view = MAINVIEW_MENU;
                 }
                 break;
+            case MAINVIEW_2048:
+                if (!two048_step(game_state, s)) {
+                    ms.view = MAINVIEW_MENU;
+                }
+                break;
             case MAINVIEW_MUSIC:
-                if (!music_step(game_state, s)) {
+                if (!music_step2(game_state, s)) {
                     ms.view = MAINVIEW_MENU;
                 }
                 break;
@@ -532,13 +618,13 @@ int main() {
                         mf_font_fixed_5x8, MF_ALIGN_LEFT);
         }
 
-        wheel_next_frame();
+        // wheel_next_frame();
 
         // update brightness
         pwm_set_gpio_level(PIN_BL, (uint16_t)(brightness * brightness));
 
         // swap buffers
-        uint16_t *a = front_buffer;
+        volatile uint16_t *a = front_buffer;
         front_buffer = back_buffer;
         back_buffer = a;
 
@@ -547,19 +633,18 @@ int main() {
         long time3 = to_us_since_boot(get_absolute_time());
 
         const float conversion_factor = 3.3f / (1 << 12);
+        const float alpha = 0.05;
 
-        float batt_voltage = 0.0;
-        for (int i = 0; i < 100; i++) {
-            uint16_t result = adc_read();
-            batt_voltage += result * conversion_factor * 1.3727272727272728 * 1.0 / 100;
-        }
+        uint16_t result = adc_read();
+        float voltage = result * conversion_factor * 1.3727272727272728;
+        battery_voltage_avg = (alpha * voltage) + (1.0 - alpha) * battery_voltage_avg;
         
         if (debug_enabled) {
-            sprintf(debug_string, "c:%lu r:%lu f:%lu t:%lu %.01f %.01f%% %.02fV",
-                    time1 - time, time2 - time1, time3 - time2, time3 - time,
+            sprintf(debug_string, "c:%.02f r:%.02f f:%.02f t:%.02f %.01f %.01f%% %.02fV",
+                    (time1 - time) / 1000.0, (time2 - time1) / 1000.0, (time3 - time2) / 1000.0, (time3 - time) / 1000.0,
                     1000000.0 / (float)(time3 - time),
                     (time2 - time1) / (10000.0 / 60.0),
-                batt_voltage);
+                battery_voltage_avg);
         }
     }
 

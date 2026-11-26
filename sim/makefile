@@ -1,4 +1,4 @@
-SIM_LIBS := mcufont st7789
+SIM_LIBS := mcufont
 
 SIM_SRC := $(shell find src -name "*.c")
 SW_SRC := $(shell find ../src -name "*.c")
@@ -13,7 +13,7 @@ SW_OBJS := $(patsubst ../src/%,sw_obj/%,$(SW_SRC:.c=.o))
 LIB_OBJS := $(shell python3 create_obj_paths.py $(LIB_SRC))
 #$(pathsubst ../lib/%/%,lib_obj/%/%,$(LIB_SRC:.c=.o))
 
-CFLAGS := -Iinclude -g -DTESTING -Wall
+CFLAGS := -Iinclude -g -DTESTING -Wall -fdiagnostics-color=always
 LIBRARIES := -lm -lSDL2 -lpthread
 EXE := main
 

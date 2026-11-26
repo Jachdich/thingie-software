@@ -68,10 +68,6 @@ typedef struct {
     long last_move_time;
 } TetrisState;
 
-Vec2 vec2_mul(Vec2 v, int x) {
-    return vec2(v.x * x, v.y * x);
-}
-
 int get_index_from_piece(Piece p, uint8_t rotation, Vec2 pos) {
     return 4 * 4 * 4 * p + 4 * 4 * pos.y + 4 * rotation + pos.x;
 }

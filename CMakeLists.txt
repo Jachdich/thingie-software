@@ -10,6 +10,7 @@ project(my_project)
 pico_sdk_init()
 
 add_definitions("-W -Wall -Wunreachable-code  -Wwrite-strings -Wpointer-arith -Wbad-function-cast -Wcast-align -Wcast-qual -fstack-usage -DUSE_PRINTF -DUSE_DBG_PRINTF")
+add_compile_definitions(USE_PRINTF USE_DBG_PRINTF)
 
 add_executable(main
     src/main.c
@@ -24,6 +25,7 @@ add_executable(main
     src/as5600.c
     src/scroller.c
     src/wheel.c
+    src/2048.c
 
     lib/mcufont/mf_bwfont.c
     lib/mcufont/mf_font.c

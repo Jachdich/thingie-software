@@ -191,9 +191,6 @@ static void dma_i2s_in_handler()
 #include "../lib/libmad/mad.h"
 // #include "../include/mp32.h"
 #include "../include/drawing.h"
-uint8_t mp3[100];
-uint32_t mp3_len = 100;
-
 
 struct MusicState {
     struct mad_stream stream;
@@ -211,7 +208,7 @@ void music_init(struct MusicState *state) {
     mad_synth_init(&state->synth);
     mad_stream_options(&state->stream, 0);
 
-    mad_stream_buffer(&state->stream, mp3, mp3_len);
+    // mad_stream_buffer(&state->stream, mp3, mp3_len);
 
     i2s_config i2s_cfg = (i2s_config){ .fs = 48000, .sck_mult = 256, .bit_depth=32, .sck_pin = 8, .dout_pin = 9, .din_pin = 5, .clock_pin_base = 6, .sck_enable = true};
     i2s_program_start_synched(pio0, &i2s_cfg, dma_i2s_in_handler, &i2s);
@@ -224,7 +221,7 @@ void music_init(struct MusicState *state) {
 
 }
 
-int music_step(struct MusicState *state, Screen s) {
+int music_step(struct MusicState *state, Screen s, uint8_t *mp3, uint32_t mp3_len, uint32_t *mp3_read_ptr) {
     float len_f = (write_ptr - read_ptr) % BUFFER_SIZE;
     int len = len_f / BUFFER_SIZE * 200;
     draw_rect(s, vec2(0, 110), vec2(len, 20), 0xffff);
